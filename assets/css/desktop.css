@@ -189,6 +189,21 @@
         background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
         border-right: 1px solid #e2e8f0;
         box-shadow: var(--desktop-shadow-heavy);
+        position: fixed;
+        z-index: 10;
+        transition: width 0.3s ease;
+    }
+
+    .sidebar-enhanced.collapsed {
+        width: 60px;
+    }
+
+    .sidebar-enhanced.collapsed .sidebar-nav span {
+        display: none;
+    }
+
+    .sidebar-enhanced.collapsed .sidebar-title {
+        display: none;
     }
 
     .nav-menu {
@@ -246,6 +261,13 @@
         padding: var(--desktop-content-padding);
         min-height: calc(100vh - var(--desktop-header-height));
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        position: relative;
+        z-index: 1;
+        transition: margin-left 0.3s ease;
+    }
+
+    .main-content.sidebar-collapsed {
+        margin-left: 60px;
     }
 
     /* Enhanced Cards */

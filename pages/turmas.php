@@ -199,10 +199,15 @@ function formatarDiasSemana($dias) {
 
     <div class="flex">
         <!-- Sidebar -->
-        <aside class="sidebar-enhanced text-white w-64 min-h-screen p-4">
+        <aside class="sidebar-enhanced text-white w-64 min-h-screen p-4" id="sidebar">
+            <!-- Toggle Button -->
+            <button id="sidebarToggle" class="sidebar-toggle-btn" title="Recolher/Expandir Menu">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
             <div class="flex items-center mb-8">
                 <img src="../assets/images/icon-192x192.png" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
-                <h2 class="text-xl font-bold"><?php echo SITE_NAME; ?></h2>
+                <h2 class="text-xl font-bold sidebar-title"><?php echo SITE_NAME; ?></h2>
             </div>
             <nav class="sidebar-nav space-y-2">
                 <a href="dashboard.php" class="flex items-center space-x-3 text-gray-300 hover:bg-gray-700 p-3 rounded-lg transition duration-200">
@@ -461,5 +466,32 @@ function formatarDiasSemana($dias) {
         </main>
     </div>
     <script src="../assets/js/mobile.js"></script>
+    
+    <script>
+        // Toggle do Sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('main');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    
+                    // Salvar estado no localStorage
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                });
+            }
+            
+            // Restaurar estado do sidebar ao carregar a página
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('sidebar-collapsed');
+            }
+        });
+    </script>
 </body>
 </html>

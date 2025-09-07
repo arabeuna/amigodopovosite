@@ -150,8 +150,8 @@ if ($turma_selecionada) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Presenças - <?php echo SITE_NAME; ?></title>
-    <link rel="icon" type="image/png" href="../assets/images/icon-192x192.png">
-    <link rel="apple-touch-icon" href="../assets/images/icon-192x192.png">
+    <link rel="icon" type="image/png" href="../assets/images/logo_associacao.svg">
+    <link rel="apple-touch-icon" href="../assets/images/logo_associacao.svg">
     <link href="../assets/css/tailwind.min.css" rel="stylesheet">
     <link href="../assets/css/theme.css" rel="stylesheet">
     <link href="../assets/css/custom.css" rel="stylesheet">
@@ -166,7 +166,7 @@ if ($turma_selecionada) {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center">
-                    <img src="../assets/images/icon-192x192.png" alt="Logo" class="logo logo-md logo-header mr-3">
+                    <img src="../assets/images/logo_associacao.svg" alt="Logo" class="logo logo-md logo-header mr-3">
                     <h1 class="text-xl font-semibold"><?php echo SITE_NAME; ?></h1>
                     <span class="text-blue-200 ml-4">Controle de Presenças</span>
                 </div>
@@ -185,10 +185,15 @@ if ($turma_selecionada) {
 
     <div class="flex">
         <!-- Sidebar -->
-        <aside class="sidebar-enhanced text-white w-64 min-h-screen p-4">
+        <aside class="sidebar-enhanced text-white w-64 min-h-screen p-4" id="sidebar">
+            <!-- Toggle Button -->
+            <button id="sidebarToggle" class="sidebar-toggle-btn" title="Recolher/Expandir Menu">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
             <div class="flex items-center mb-8">
-                <img src="../assets/images/icon-192x192.png" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
-                <h2 class="text-xl font-bold"><?php echo SITE_NAME; ?></h2>
+                <img src="../assets/images/logo_associacao.svg" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
+                <h2 class="text-xl font-bold sidebar-title"><?php echo SITE_NAME; ?></h2>
             </div>
             <nav class="sidebar-nav space-y-2">
                 <a href="dashboard.php" class="flex items-center space-x-3 text-gray-300 hover:bg-gray-700 p-3 rounded-lg transition duration-200">
@@ -442,5 +447,32 @@ if ($turma_selecionada) {
         });
     </script>
     <script src="../assets/js/mobile.js"></script>
+    
+    <script>
+        // Toggle do Sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('main');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    
+                    // Salvar estado no localStorage
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                });
+            }
+            
+            // Restaurar estado do sidebar ao carregar a página
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('sidebar-collapsed');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -32,8 +32,8 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - <?= SITE_NAME ?></title>
-    <link rel="icon" type="image/png" href="../assets/images/icon-192x192.png">
-    <link rel="apple-touch-icon" href="../assets/images/icon-192x192.png">
+    <link rel="icon" type="image/svg+xml" href="../assets/images/logo_associacao.svg">
+    <link rel="apple-touch-icon" href="../assets/images/logo_associacao.svg">
     <link href="../assets/css/tailwind.min.css" rel="stylesheet">
     <link href="../assets/css/theme.css" rel="stylesheet">
     <link href="../assets/css/custom.css" rel="stylesheet">
@@ -48,7 +48,7 @@ try {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center">
-                    <img src="../assets/images/icon-192x192.png" alt="Logo" class="logo logo-md logo-header mr-3">
+                    <img src="../assets/images/icon-192x192 (1).png?v=<?= time() ?>" alt="Logo" style="width: 40px; height: 40px; margin-right: 10px; display: block;">
                     <h1 class="text-xl font-semibold"><?= SITE_NAME ?></h1>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -66,7 +66,12 @@ try {
 
     <div class="flex">
         <!-- Sidebar -->
-        <nav class="sidebar-enhanced">
+        <nav class="sidebar-enhanced" id="sidebar">
+            <!-- Toggle Button -->
+            <button id="sidebarToggle" class="sidebar-toggle-btn" title="Recolher/Expandir Menu">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
             <div class="nav-menu">
                 <ul class="space-y-1">
                     <li class="nav-item">
@@ -297,5 +302,32 @@ try {
     </div>
     <script src="../assets/js/vite-blocker.js"></script>
     <script src="../assets/js/mobile.js"></script>
+    
+    <script>
+        // Toggle do Sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('main');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    
+                    // Salvar estado no localStorage
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                });
+            }
+            
+            // Restaurar estado do sidebar ao carregar a página
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('sidebar-collapsed');
+            }
+        });
+    </script>
 </body>
 </html>

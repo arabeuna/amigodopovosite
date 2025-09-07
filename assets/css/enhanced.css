@@ -117,15 +117,67 @@ body {
 /* Enhanced Sidebar */
 .sidebar-enhanced {
     width: 250px;
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     border-right: 1px solid var(--border-secondary);
     height: calc(100vh - 80px);
     position: fixed;
     left: 0;
     top: 80px;
     overflow-y: auto;
-    box-shadow: var(--shadow-lg);
-    z-index: var(--z-fixed);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 20;
+    font-size: 16px;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+}
+
+.sidebar-toggle-btn i {
+    transition: transform 0.3s ease;
+}
+
+/* Collapsed Sidebar */
+.sidebar-enhanced.collapsed {
+    width: 60px;
+    overflow: hidden;
+}
+
+.sidebar-enhanced.collapsed .sidebar-title,
+.sidebar-enhanced.collapsed .sidebar-nav span {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar-enhanced.collapsed .sidebar-toggle-btn i {
+    transform: rotate(180deg);
+}
+
+.sidebar-enhanced.collapsed .logo-sidebar {
+    margin-right: 0;
 }
 
 .nav-menu {
@@ -182,6 +234,36 @@ body {
     margin-left: 250px;
     padding: var(--space-xl);
     min-height: calc(100vh - 80px);
+    position: relative;
+    z-index: 1;
+}
+
+/* Desktop and Tablet Specific Adjustments */
+@media (min-width: 769px) {
+    .sidebar-enhanced {
+        position: fixed;
+        z-index: 10;
+    }
+    
+    .main-content {
+        position: relative;
+        z-index: 1;
+        margin-left: 250px;
+        transition: margin-left 0.3s ease;
+    }
+    
+    .main-content.sidebar-collapsed {
+        margin-left: 60px;
+    }
+    
+    /* Ensure content containers have proper stacking */
+    .container,
+    .card-enhanced,
+    .data-table-container,
+    .form-container {
+        position: relative;
+        z-index: auto;
+    }
 }
 
 /* Enhanced Cards */

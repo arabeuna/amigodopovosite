@@ -66,6 +66,10 @@ CREATE TABLE alunos (
     telefone_responsavel VARCHAR(20),
     observacoes TEXT,
     foto VARCHAR(255),
+    titulo_inscricao VARCHAR(12),
+    titulo_zona VARCHAR(3),
+    titulo_secao VARCHAR(4),
+    titulo_municipio_uf VARCHAR(100),
     ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
