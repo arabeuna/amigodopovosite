@@ -9,8 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Inicializar conexão com banco de dados
-$database = new Database();
-$db = $database;
+$db = new Database();
 
 $message = '';
 $error = '';
@@ -24,28 +23,30 @@ $turmas = $db->query("SELECT id, nome, horario_inicio, horario_fim FROM turmas W
 
 // Processar formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome_completo = sanitize_input($_POST['nome_completo']);
-    $data_nascimento = $_POST['data_nascimento'];
-    $cpf = sanitize_input($_POST['cpf']);
-    $rg = sanitize_input($_POST['rg']);
-    $titulo_eleitor = sanitize_input($_POST['titulo_eleitor']);
-    $zona_eleitoral = sanitize_input($_POST['zona_eleitoral']);
-    $municipio = sanitize_input($_POST['municipio']);
-    $sexo = $_POST['sexo'];
-    $estado_civil = $_POST['estado_civil'];
-    $telefone = sanitize_input($_POST['telefone']);
-    $email = sanitize_input($_POST['email']);
-    $endereco_completo = sanitize_input($_POST['endereco_completo']);
-    $estado = sanitize_input($_POST['estado']);
-    $atividade_id = (int)$_POST['atividade_id'];
-    $turma_id = (int)$_POST['turma_id'];
-    $data_inicio = $_POST['data_inicio'];
-    $status = $_POST['status'];
-    $nome_responsavel = sanitize_input($_POST['nome_responsavel']);
-    $telefone_responsavel = sanitize_input($_POST['telefone_responsavel']);
+    $nome = sanitize_input($_POST['nome'] ?? '');
+    $data_nascimento = $_POST['data_nascimento'] ?? '';
+    $cpf = sanitize_input($_POST['cpf'] ?? '');
+    $rg = sanitize_input($_POST['rg'] ?? '');
+    $titulo_eleitor = sanitize_input($_POST['titulo_eleitor'] ?? '');
+    $zona_eleitoral = sanitize_input($_POST['zona_eleitoral'] ?? '');
+    $municipio = sanitize_input($_POST['municipio'] ?? '');
+    $sexo = $_POST['sexo'] ?? '';
+    $estado_civil = $_POST['estado_civil'] ?? '';
+    $telefone = sanitize_input($_POST['telefone'] ?? '');
+    $email = sanitize_input($_POST['email'] ?? '');
+    $endereco_completo = sanitize_input($_POST['endereco'] ?? '');
+    $estado = sanitize_input($_POST['estado'] ?? '');
+    $atividade_id = (int)($_POST['atividade_id'] ?? 0);
+    $turma_id = (int)($_POST['turma_id'] ?? 0);
+    $data_inicio = $_POST['data_inicio'] ?? '';
+    $status = $_POST['status'] ?? 'ativo';
+    $nome_responsavel = sanitize_input($_POST['nome_responsavel'] ?? '');
+    $telefone_responsavel = sanitize_input($_POST['telefone_responsavel'] ?? '');
     
-    if (empty($nome_completo)) {
+    if (empty($nome)) {
         $error = 'Nome completo é obrigatório';
+    } elseif ($turma_id <= 0) {
+        $error = 'Selecione uma turma para matrícula';
     } else {
         // Processar upload da foto
         $foto_nome = null;
@@ -80,21 +81,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if (empty($error)) {
             try {
-            // Inserir aluno
-            $sql = "INSERT INTO alunos (nome, cpf, rg, data_nascimento, sexo, telefone, email, endereco, estado, titulo_eleitor, zona_eleitoral, municipio, estado_civil, nome_responsavel, telefone_responsavel, foto, ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)";
-            $stmt = $db->prepare($sql);
-            $stmt->execute([$nome_completo, $cpf, $rg, $data_nascimento, $sexo, $telefone, $email, $endereco_completo, $estado, $titulo_eleitor, $zona_eleitoral, $municipio, $estado_civil, $nome_responsavel, $telefone_responsavel, $foto_nome]);
-            
-            $aluno_id = $db->connect()->lastInsertId();
-            
-            // Inserir matrícula
-            if ($atividade_id && $turma_id) {
-                $sql_matricula = "INSERT INTO matriculas (aluno_id, atividade_id, turma_id, data_matricula, status) VALUES (?, ?, ?, ?, ?)";
-                $stmt_matricula = $db->prepare($sql_matricula);
-                $stmt_matricula->execute([$aluno_id, $atividade_id, $turma_id, $data_inicio, $status]);
-            }
-            
-            $message = 'Aluno cadastrado com sucesso!';
+                // Inserir aluno
+                $sql = "INSERT INTO alunos (nome, cpf, rg, data_nascimento, sexo, telefone, email, endereco, estado, nome_responsavel, telefone_responsavel, foto, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                $stmt = $db->prepare($sql);
+                $result = $stmt->execute([$nome, $cpf, $rg, $data_nascimento, $sexo, $telefone, $email, $endereco_completo, $estado, $nome_responsavel, $telefone_responsavel, $foto_nome]);
+                
+                $aluno_id = $db->lastInsertId();
+                
+                // Inserir matrícula
+                if ($turma_id > 0) {
+                    $sql_matricula = "INSERT INTO matriculas (aluno_id, turma_id, data_matricula, status) VALUES (?, ?, NOW(), ?)";
+                    $stmt_matricula = $db->prepare($sql_matricula);
+                    $result_matricula = $stmt_matricula->execute([$aluno_id, $turma_id, $status]);
+                }
+                
+                $message = 'Aluno cadastrado com sucesso!';
             } catch (Exception $e) {
                 $error = 'Erro ao cadastrar aluno: ' . $e->getMessage();
             }
@@ -292,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
             
             <div class="flex items-center mb-8">
-                <img src="../assets/images/icon-192x192.png" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
+                <img src="../assets/images/icon-192x192 (1).png" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
                 <h2 class="text-xl font-bold sidebar-title"><?php echo SITE_NAME; ?></h2>
             </div>
             <nav class="sidebar-nav space-y-2">
@@ -333,7 +334,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center">
-                        <img src="../assets/images/icon-192x192.png" alt="Logo" class="w-12 h-12 mr-4">
+                        <img src="../assets/images/icon-192x192 (1).png" alt="Logo" class="w-12 h-12 mr-4">
                         <h1 class="text-2xl font-bold text-gray-800">Associação Amigo do Povo</h1>
                     </div>
                     <div class="photo-placeholder">
@@ -353,11 +354,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if ($message): ?>
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 no-print">
                         <?php echo $message; ?>
-                        <?php if ($aluno_id): ?>
-                            <button onclick="window.print()" class="ml-4 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
-                                <i class="fas fa-print mr-1"></i> Imprimir
-                            </button>
-                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
 
@@ -379,7 +375,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
-                                <input type="text" name="nome_completo" required 
+                                <input type="text" name="nome" required 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
@@ -455,7 +451,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Endereço Completo</label>
-                                <input type="text" name="endereco_completo" 
+                                <input type="text" name="endereco" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
@@ -479,7 +475,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Atividade *</label>
-                                <select name="atividade_id" 
+                                <select name="atividade_id" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Selecione uma atividade</option>
                                     <?php foreach ($atividades as $atividade): ?>
@@ -490,7 +486,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Turma/Horário *</label>
-                                <select name="turma_id" 
+                                <select name="turma_id" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Selecione uma turma</option>
                                     <?php foreach ($turmas as $turma): ?>
@@ -540,14 +536,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <i class="fas fa-arrow-left mr-2"></i>Voltar
                         </a>
                         
-                        <div class="flex space-x-3">
-                            <button type="button" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors" onclick="printForm()">
-                                <i class="fas fa-print mr-2"></i>Imprimir Formulário
-                            </button>
-                            <button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                                <i class="fas fa-save mr-2"></i>Cadastrar Aluno
-                            </button>
-                        </div>
+                        <button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-save mr-2"></i>Cadastrar Aluno
+                        </button>
                     </div>
                 </form>
 
@@ -596,30 +587,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 mainContent.classList.add('sidebar-collapsed');
             }
         });
-        
-        // Função para imprimir o formulário
-        function printForm() {
-            // Salva o título original
-            const originalTitle = document.title;
-            
-            // Define um título específico para impressão
-            document.title = 'Cadastro de Aluno - Associação Amigo do Povo';
-            
-            // Adiciona data de impressão
-            const printInfo = document.createElement('div');
-            printInfo.className = 'print-info print-only';
-            printInfo.innerHTML = `Impresso em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`;
-            document.querySelector('.form-container').appendChild(printInfo);
-            
-            // Executa a impressão
-            window.print();
-            
-            // Restaura o título original após a impressão
-            setTimeout(() => {
-                document.title = originalTitle;
-                printInfo.remove();
-            }, 1000);
-        }
+
     </script>
 </body>
 </html>

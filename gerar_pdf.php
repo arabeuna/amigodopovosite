@@ -9,10 +9,23 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $aluno_id = (int)$_GET['id'];
 
-// Buscar dados do aluno no banco de dados
+// Buscar dados do aluno e matrícula no banco de dados
 try {
     $database = new Database();
-    $stmt = $database->query("SELECT * FROM alunos WHERE id = ?", [$aluno_id]);
+    $sql = "
+        SELECT a.*, 
+               m.data_matricula, m.status as status_matricula,
+               t.nome as turma_nome, t.horario_inicio, t.horario_fim,
+               at.nome as atividade_nome, at.descricao as atividade_descricao
+        FROM alunos a
+        LEFT JOIN matriculas m ON a.id = m.aluno_id
+        LEFT JOIN turmas t ON m.turma_id = t.id
+        LEFT JOIN atividades at ON t.atividade_id = at.id
+        WHERE a.id = ?
+        ORDER BY m.data_matricula DESC
+        LIMIT 1
+    ";
+    $stmt = $database->query($sql, [$aluno_id]);
     $aluno = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$aluno) {
@@ -115,33 +128,50 @@ $pdf->SetTextColor(0, 0, 0);
 // Espaço inicial (título já está no cabeçalho)
 $pdf->Ln(3);
 
-// Área da foto (posicionamento igual ao modelo)
+// Área da foto (posicionamento melhorado)
 $foto_x = 15;
 $foto_y = $pdf->GetY();
-$foto_width = 35;
-$foto_height = 45;
+$foto_width = 38;
+$foto_height = 48;
 
-// Moldura da foto removida para evitar borda preta
+// Moldura elegante para a foto
+$pdf->SetDrawColor(0, 51, 102);
+$pdf->SetLineWidth(0.8);
+$pdf->Rect($foto_x, $foto_y, $foto_width, $foto_height, 'D');
+
+// Moldura interna mais sutil
+$pdf->SetDrawColor(200, 200, 200);
+$pdf->SetLineWidth(0.3);
+$pdf->Rect($foto_x + 2, $foto_y + 2, $foto_width - 4, $foto_height - 4, 'D');
 
 // Verificar se existe foto
 if (!empty($aluno['foto']) && file_exists('uploads/fotos/' . $aluno['foto'])) {
-    $pdf->Image('uploads/fotos/' . $aluno['foto'], $foto_x + 1, $foto_y + 1, $foto_width - 2, $foto_height - 2, '', '', '', false, 300, '', false, false, 1);
+    $pdf->Image('uploads/fotos/' . $aluno['foto'], $foto_x + 3, $foto_y + 3, $foto_width - 6, $foto_height - 6, '', '', '', false, 300, '', false, false, 1);
 } else {
-    // Placeholder para foto
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->SetTextColor(128, 128, 128);
-    $pdf->SetXY($foto_x + 5, $foto_y + 20);
-    $pdf->Cell($foto_width - 10, 5, 'FOTO', 0, 1, 'C');
-    $pdf->SetXY($foto_x + 5, $foto_y + 25);
-    $pdf->Cell($foto_width - 10, 5, '3x4', 0, 1, 'C');
+    // Placeholder para foto mais elegante
+    $pdf->SetFillColor(248, 249, 250);
+    $pdf->Rect($foto_x + 3, $foto_y + 3, $foto_width - 6, $foto_height - 6, 'F');
+    
+    $pdf->SetFont('helvetica', 'B', 11);
+    $pdf->SetTextColor(120, 120, 120);
+    $pdf->SetXY($foto_x + 8, $foto_y + 20);
+    $pdf->Cell($foto_width - 16, 6, 'FOTO', 0, 1, 'C');
+    $pdf->SetXY($foto_x + 8, $foto_y + 26);
+    $pdf->Cell($foto_width - 16, 6, '3x4', 0, 1, 'C');
 }
 
-// Informações pessoais (lado direito da foto, igual ao modelo)
-$info_x = $foto_x + $foto_width + 10;
-$pdf->SetXY($info_x, $foto_y);
-$pdf->SetFont('helvetica', 'B', 12);
+// Informações pessoais (lado direito da foto, melhor espaçamento)
+$info_x = $foto_x + $foto_width + 12;
+$pdf->SetXY($info_x, $foto_y + 2);
+$pdf->SetFont('helvetica', 'B', 13);
 $pdf->SetTextColor(0, 51, 102);
 $pdf->Cell(0, 8, 'INFORMAÇÕES PESSOAIS', 0, 1);
+
+// Linha decorativa sob o título
+$pdf->SetDrawColor(0, 51, 102);
+$pdf->SetLineWidth(0.4);
+$pdf->Line($info_x, $pdf->GetY(), $info_x + 120, $pdf->GetY());
+$pdf->Ln(3);
 
 $pdf->SetFont('helvetica', '', 10);
 $pdf->SetTextColor(0, 0, 0);
@@ -182,13 +212,20 @@ $pdf->Cell(40, 6, 'Sexo:', 0, 0);
 $pdf->SetFont('helvetica', '', 9);
 $pdf->Cell(0, 6, $aluno['sexo'] ?? '', 0, 1);
 
-// Pular para baixo da foto
-$pdf->SetY($foto_y + $foto_height + 10);
+// Pular para baixo da foto com melhor espaçamento
+$pdf->SetY($foto_y + $foto_height + 15);
 
-// Seção de Contato
-$pdf->SetFont('helvetica', 'B', 12);
+// Seção de Contato com design melhorado
+$pdf->SetFont('helvetica', 'B', 13);
 $pdf->SetTextColor(0, 51, 102);
 $pdf->Cell(0, 8, 'INFORMAÇÕES DE CONTATO', 0, 1);
+
+// Linha decorativa
+$pdf->SetDrawColor(0, 51, 102);
+$pdf->SetLineWidth(0.4);
+$pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+$pdf->Ln(5);
+
 $pdf->SetFont('helvetica', '', 10);
 $pdf->SetTextColor(0, 0, 0);
 
@@ -210,12 +247,19 @@ $pdf->Cell(20, 6, 'E-mail:', 0, 0);
 $pdf->SetFont('helvetica', '', 9);
 $pdf->Cell(0, 6, $aluno['email'] ?? '', 0, 1);
 
-$pdf->Ln(5);
+$pdf->Ln(8);
 
-// Seção de Endereço
-$pdf->SetFont('helvetica', 'B', 12);
+// Seção de Endereço com design melhorado
+$pdf->SetFont('helvetica', 'B', 13);
 $pdf->SetTextColor(0, 51, 102);
 $pdf->Cell(0, 8, 'ENDEREÇO', 0, 1);
+
+// Linha decorativa
+$pdf->SetDrawColor(0, 51, 102);
+$pdf->SetLineWidth(0.4);
+$pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+$pdf->Ln(5);
+
 $pdf->SetFont('helvetica', '', 10);
 $pdf->SetTextColor(0, 0, 0);
 
@@ -245,11 +289,18 @@ $pdf->Cell(0, 6, $aluno['estado'] ?? '', 0, 1);
 
 $pdf->Ln(5);
 
-// Seção Título de Eleitor
+// Seção Título de Eleitor com design melhorado
 if (!empty($aluno['titulo_inscricao'])) {
-    $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->SetFont('helvetica', 'B', 13);
     $pdf->SetTextColor(0, 51, 102);
     $pdf->Cell(0, 8, 'TÍTULO DE ELEITOR', 0, 1);
+    
+    // Linha decorativa
+    $pdf->SetDrawColor(0, 51, 102);
+    $pdf->SetLineWidth(0.4);
+    $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+    $pdf->Ln(5);
+    
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetTextColor(0, 0, 0);
     
@@ -257,31 +308,38 @@ if (!empty($aluno['titulo_inscricao'])) {
 $pdf->SetFont('helvetica', 'B', 9);
 $pdf->Cell(25, 6, 'Inscrição:', 0, 0);
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(50, 6, $aluno['titulo_eleitor'] ?? '', 0, 0);
+$pdf->Cell(50, 6, $aluno['titulo_inscricao'] ?? '', 0, 0);
 
 $pdf->SetFont('helvetica', 'B', 9);
 $pdf->Cell(15, 6, 'Zona:', 0, 0);
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(30, 6, $aluno['zona_eleitoral'] ?? '', 0, 0);
+$pdf->Cell(30, 6, $aluno['titulo_zona'] ?? '', 0, 0);
 
 $pdf->SetFont('helvetica', 'B', 9);
 $pdf->Cell(15, 6, 'Seção:', 0, 0);
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(0, 6, $aluno['secao_eleitoral'] ?? '', 0, 1);
+$pdf->Cell(0, 6, $aluno['titulo_secao'] ?? '', 0, 1);
 
 $pdf->SetFont('helvetica', 'B', 9);
 $pdf->Cell(35, 6, 'Município/UF:', 0, 0);
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(0, 6, $aluno['municipio_titulo'] ?? '', 0, 1);
+$pdf->Cell(0, 6, $aluno['titulo_municipio_uf'] ?? '', 0, 1);
     
     $pdf->Ln(5);
 }
 
-// Seção Responsável
+// Seção Responsável com design melhorado
 if (!empty($aluno['nome_responsavel'])) {
-    $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->SetFont('helvetica', 'B', 13);
     $pdf->SetTextColor(0, 51, 102);
     $pdf->Cell(0, 8, 'INFORMAÇÕES DO RESPONSÁVEL', 0, 1);
+    
+    // Linha decorativa
+    $pdf->SetDrawColor(0, 51, 102);
+    $pdf->SetLineWidth(0.4);
+    $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+    $pdf->Ln(5);
+    
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetTextColor(0, 0, 0);
     
@@ -298,41 +356,128 @@ if (!empty($aluno['nome_responsavel'])) {
     $pdf->Ln(5);
 }
 
-// Seção Observações
-if (!empty($aluno['observacoes'])) {
-    $pdf->SetFont('helvetica', 'B', 12);
+// Seção Matrícula com design melhorado
+if (!empty($aluno['atividade_nome']) || !empty($aluno['turma_nome'])) {
+    $pdf->SetFont('helvetica', 'B', 13);
     $pdf->SetTextColor(0, 51, 102);
-    $pdf->Cell(0, 8, 'OBSERVAÇÕES', 0, 1);
+    $pdf->Cell(0, 8, 'INFORMAÇÕES DA MATRÍCULA', 0, 1);
+    
+    // Linha decorativa
+    $pdf->SetDrawColor(0, 51, 102);
+    $pdf->SetLineWidth(0.4);
+    $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+    $pdf->Ln(5);
+    
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetTextColor(0, 0, 0);
     
-    // Usar MultiCell para texto longo
-    $pdf->MultiCell(0, 6, $aluno['observacoes'], 0, 'L');
+    // Atividade
+    if (!empty($aluno['atividade_nome'])) {
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->Cell(25, 6, 'Atividade:', 0, 0);
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->Cell(0, 6, $aluno['atividade_nome'], 0, 1);
+        
+        if (!empty($aluno['atividade_descricao'])) {
+            $pdf->SetFont('helvetica', 'B', 9);
+            $pdf->Cell(25, 6, 'Descrição:', 0, 0);
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->Cell(0, 6, $aluno['atividade_descricao'], 0, 1);
+        }
+    }
+    
+    // Turma e Horário
+    if (!empty($aluno['turma_nome'])) {
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->Cell(25, 6, 'Turma:', 0, 0);
+        $pdf->SetFont('helvetica', '', 9);
+        $turma_info = $aluno['turma_nome'];
+        if (!empty($aluno['horario_inicio']) && !empty($aluno['horario_fim'])) {
+            $turma_info .= ' - ' . date('H:i', strtotime($aluno['horario_inicio'])) . ' às ' . date('H:i', strtotime($aluno['horario_fim']));
+        }
+        $pdf->Cell(0, 6, $turma_info, 0, 1);
+    }
+    
+    // Data de Matrícula e Status
+    if (!empty($aluno['data_matricula'])) {
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->Cell(30, 6, 'Data da Matrícula:', 0, 0);
+        $pdf->SetFont('helvetica', '', 9);
+        $data_matricula = date('d/m/Y', strtotime($aluno['data_matricula']));
+        $pdf->Cell(50, 6, $data_matricula, 0, 0);
+        
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->Cell(20, 6, 'Status:', 0, 0);
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->Cell(0, 6, $aluno['status_matricula'] ?? 'Ativo', 0, 1);
+    }
+    
     $pdf->Ln(5);
 }
 
-// Área de assinatura
-$pdf->Ln(12);
-$pdf->SetFont('helvetica', 'B', 12);
-$pdf->SetTextColor(0, 51, 102);
-$pdf->Cell(0, 8, 'DECLARAÇÃO E ASSINATURA', 0, 1, 'C');
-$pdf->Ln(5);
+// Seção Observações com design melhorado
+if (!empty($aluno['observacoes'])) {
+    $pdf->SetFont('helvetica', 'B', 13);
+    $pdf->SetTextColor(0, 51, 102);
+    $pdf->Cell(0, 8, 'OBSERVAÇÕES', 0, 1);
+    
+    // Linha decorativa
+    $pdf->SetDrawColor(0, 51, 102);
+    $pdf->SetLineWidth(0.4);
+    $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+    $pdf->Ln(5);
+    
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    
+    // Caixa com fundo sutil para observações
+    $pdf->SetFillColor(248, 249, 250);
+    $pdf->SetDrawColor(220, 220, 220);
+    $pdf->SetLineWidth(0.2);
+    
+    // Calcular altura necessária para o texto
+    $text_height = $pdf->getStringHeight(180, $aluno['observacoes']);
+    $box_height = max($text_height + 4, 12);
+    
+    $pdf->Rect(15, $pdf->GetY(), 180, $box_height, 'DF');
+    $pdf->SetXY(17, $pdf->GetY() + 2);
+    $pdf->MultiCell(176, 6, $aluno['observacoes'], 0, 'L');
+    $pdf->SetY($pdf->GetY() + $box_height - $text_height + 3);
+}
 
+// Área de assinatura melhorada
+$pdf->Ln(15);
+
+// Caixa decorativa para a declaração
+$pdf->SetFillColor(245, 248, 252);
+$pdf->SetDrawColor(0, 51, 102);
+$pdf->SetLineWidth(0.5);
+$pdf->Rect(15, $pdf->GetY(), 180, 35, 'DF');
+
+$pdf->SetXY(15, $pdf->GetY() + 5);
+$pdf->SetFont('helvetica', 'B', 13);
+$pdf->SetTextColor(0, 51, 102);
+$pdf->Cell(180, 8, 'DECLARAÇÃO E ASSINATURA', 0, 1, 'C');
+
+$pdf->SetX(20);
 $pdf->SetFont('helvetica', '', 10);
 $pdf->SetTextColor(0, 0, 0);
-$pdf->MultiCell(0, 6, 'Declaro que as informações prestadas são verdadeiras e assumo total responsabilidade pelas mesmas.', 0, 'J', false, 1);
-$pdf->Ln(18);
+$pdf->MultiCell(170, 6, 'Declaro que as informações prestadas são verdadeiras e assumo total responsabilidade pelas mesmas.', 0, 'J', false, 1);
 
-// Linhas de assinatura
-$pdf->SetDrawColor(0, 0, 0);
-$pdf->Line(15, $pdf->GetY(), 95, $pdf->GetY());
-$pdf->Line(110, $pdf->GetY(), 190, $pdf->GetY());
+$pdf->Ln(20);
 
-$pdf->Ln(6);
-$pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(80, 5, 'Assinatura do Aluno/Responsável', 0, 0, 'C');
-$pdf->Cell(15, 5, '', 0, 0);
-$pdf->Cell(80, 5, 'Data: ___/___/______', 0, 1, 'C');
+// Linhas de assinatura mais elegantes
+$pdf->SetDrawColor(0, 51, 102);
+$pdf->SetLineWidth(0.6);
+$pdf->Line(25, $pdf->GetY(), 95, $pdf->GetY());
+$pdf->Line(115, $pdf->GetY(), 185, $pdf->GetY());
+
+$pdf->Ln(8);
+$pdf->SetFont('helvetica', 'B', 9);
+$pdf->SetTextColor(0, 51, 102);
+$pdf->Cell(70, 5, 'Assinatura do Aluno/Responsável', 0, 0, 'C');
+$pdf->Cell(20, 5, '', 0, 0);
+$pdf->Cell(70, 5, 'Data: ___/___/______', 0, 1, 'C');
 
 // Gerar e enviar o PDF
 $filename = 'Ficha_Cadastro_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $aluno['nome']) . '_' . date('Y-m-d') . '.pdf';

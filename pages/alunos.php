@@ -477,7 +477,7 @@ if (isset($_GET['edit'])) {
             </button>
             
             <div class="flex items-center mb-8">
-                    <img src="../assets/images/logo_associacao.svg" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
+                    <img src="../assets/images/icon-192x192 (1).png" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
                     <h2 class="text-xl font-bold sidebar-title"><?php echo SITE_NAME; ?></h2>
                 </div>
             <nav class="sidebar-nav space-y-2">
@@ -528,18 +528,17 @@ if (isset($_GET['edit'])) {
                 </div>
             <?php endif; ?>
 
+            <?php if ($editAluno): ?>
             <div class="form-container bg-white mb-6">
                 <div class="data-table-header">
                     <h2 class="data-table-title">
-                        <i class="fas fa-user-plus"></i>
-                        <?php echo $editAluno ? 'Editar Aluno' : 'Cadastrar Novo Aluno'; ?>
+                        <i class="fas fa-user-edit"></i>
+                        Editar Aluno
                     </h2>
                 </div>
                 <form method="POST" enctype="multipart/form-data" class="space-y-6">
-                    <input type="hidden" name="action" value="<?php echo $editAluno ? 'update' : 'create'; ?>">
-                    <?php if ($editAluno): ?>
-                        <input type="hidden" name="id" value="<?php echo $editAluno['id']; ?>">
-                    <?php endif; ?>
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="id" value="<?php echo $editAluno['id']; ?>">
                     
                     <!-- Informações Pessoais -->
                     <div class="bg-blue-50 p-4 rounded-lg">
@@ -552,25 +551,25 @@ if (isset($_GET['edit'])) {
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-3">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
-                                <input type="text" name="nome" value="<?php echo $editAluno ? htmlspecialchars($editAluno['nome']) : ''; ?>" required 
+                                <input type="text" name="nome" value="<?php echo htmlspecialchars($editAluno['nome']); ?>" required 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
-                                <input type="date" name="data_nascimento" value="<?php echo $editAluno ? $editAluno['data_nascimento'] : ''; ?>" 
+                                <input type="date" name="data_nascimento" value="<?php echo $editAluno['data_nascimento']; ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                                <input type="text" name="cpf" value="<?php echo $editAluno ? htmlspecialchars($editAluno['cpf']) : ''; ?>" 
+                                <input type="text" name="cpf" value="<?php echo htmlspecialchars($editAluno['cpf']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">RG</label>
-                                <input type="text" name="rg" value="<?php echo $editAluno ? htmlspecialchars($editAluno['rg']) : ''; ?>" 
+                                <input type="text" name="rg" value="<?php echo htmlspecialchars($editAluno['rg']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
@@ -579,27 +578,27 @@ if (isset($_GET['edit'])) {
                                 <select name="sexo" 
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Selecione</option>
-                                    <option value="M" <?php echo ($editAluno && $editAluno['sexo'] === 'M') ? 'selected' : ''; ?>>Masculino</option>
-                                    <option value="F" <?php echo ($editAluno && $editAluno['sexo'] === 'F') ? 'selected' : ''; ?>>Feminino</option>
-                                    <option value="Outro" <?php echo ($editAluno && $editAluno['sexo'] === 'Outro') ? 'selected' : ''; ?>>Outro</option>
+                                    <option value="M" <?php echo ($editAluno['sexo'] === 'M') ? 'selected' : ''; ?>>Masculino</option>
+                                    <option value="F" <?php echo ($editAluno['sexo'] === 'F') ? 'selected' : ''; ?>>Feminino</option>
+                                    <option value="Outro" <?php echo ($editAluno['sexo'] === 'Outro') ? 'selected' : ''; ?>>Outro</option>
                                 </select>
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                                <input type="text" name="telefone" value="<?php echo $editAluno ? htmlspecialchars($editAluno['telefone']) : ''; ?>" 
+                                <input type="text" name="telefone" value="<?php echo htmlspecialchars($editAluno['telefone']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
-                                <input type="text" name="celular" value="<?php echo $editAluno ? htmlspecialchars($editAluno['celular']) : ''; ?>" 
+                                <input type="text" name="celular" value="<?php echo htmlspecialchars($editAluno['celular']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                                <input type="email" name="email" value="<?php echo $editAluno ? htmlspecialchars($editAluno['email']) : ''; ?>" 
+                                <input type="email" name="email" value="<?php echo htmlspecialchars($editAluno['email']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
@@ -635,25 +634,25 @@ if (isset($_GET['edit'])) {
                             
                             <div class="md:col-span-3">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Endereço Completo</label>
-                                <input type="text" name="endereco" value="<?php echo $editAluno ? htmlspecialchars($editAluno['endereco']) : ''; ?>" 
+                                <input type="text" name="endereco" value="<?php echo htmlspecialchars($editAluno['endereco']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-                                <input type="text" name="cep" value="<?php echo $editAluno ? htmlspecialchars($editAluno['cep']) : ''; ?>" 
+                                <input type="text" name="cep" value="<?php echo htmlspecialchars($editAluno['cep']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
-                                <input type="text" name="cidade" value="<?php echo $editAluno ? htmlspecialchars($editAluno['cidade']) : ''; ?>" 
+                                <input type="text" name="cidade" value="<?php echo htmlspecialchars($editAluno['cidade']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                                <input type="text" name="estado" value="<?php echo $editAluno ? htmlspecialchars($editAluno['estado']) : ''; ?>" 
+                                <input type="text" name="estado" value="<?php echo htmlspecialchars($editAluno['estado']); ?>" 
                                        maxlength="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                         </div>
@@ -670,28 +669,28 @@ if (isset($_GET['edit'])) {
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Número de Inscrição</label>
-                                <input type="text" name="titulo_inscricao" value="<?php echo $editAluno ? htmlspecialchars($editAluno['titulo_inscricao']) : ''; ?>" 
+                                <input type="text" name="titulo_inscricao" value="<?php echo htmlspecialchars($editAluno['titulo_inscricao']); ?>" 
                                        placeholder="Ex: 123456789012" maxlength="12"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Zona</label>
-                                <input type="text" name="titulo_zona" value="<?php echo $editAluno ? htmlspecialchars($editAluno['titulo_zona']) : ''; ?>" 
+                                <input type="text" name="titulo_zona" value="<?php echo htmlspecialchars($editAluno['titulo_zona']); ?>" 
                                        placeholder="Ex: 001" maxlength="3"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Seção</label>
-                                <input type="text" name="titulo_secao" value="<?php echo $editAluno ? htmlspecialchars($editAluno['titulo_secao']) : ''; ?>" 
+                                <input type="text" name="titulo_secao" value="<?php echo htmlspecialchars($editAluno['titulo_secao']); ?>" 
                                        placeholder="Ex: 0123" maxlength="4"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Município/UF</label>
-                                <input type="text" name="titulo_municipio_uf" value="<?php echo $editAluno ? htmlspecialchars($editAluno['titulo_municipio_uf']) : ''; ?>" 
+                                <input type="text" name="titulo_municipio_uf" value="<?php echo htmlspecialchars($editAluno['titulo_municipio_uf']); ?>" 
                                        placeholder="Ex: São Paulo/SP"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                             </div>
@@ -708,13 +707,13 @@ if (isset($_GET['edit'])) {
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Responsável</label>
-                                <input type="text" name="nome_responsavel" value="<?php echo $editAluno ? htmlspecialchars($editAluno['nome_responsavel']) : ''; ?>" 
+                                <input type="text" name="nome_responsavel" value="<?php echo htmlspecialchars($editAluno['nome_responsavel']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Telefone do Responsável</label>
-                                <input type="text" name="telefone_responsavel" value="<?php echo $editAluno ? htmlspecialchars($editAluno['telefone_responsavel']) : ''; ?>" 
+                                <input type="text" name="telefone_responsavel" value="<?php echo htmlspecialchars($editAluno['telefone_responsavel']); ?>" 
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
                         </div>
@@ -730,7 +729,7 @@ if (isset($_GET['edit'])) {
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
                             <textarea name="observacoes" rows="3" 
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><?php echo $editAluno ? htmlspecialchars($editAluno['observacoes']) : ''; ?></textarea>
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><?php echo htmlspecialchars($editAluno['observacoes']); ?></textarea>
                         </div>
                     </div>
 
@@ -747,17 +746,15 @@ if (isset($_GET['edit'])) {
                         <!-- Botões de Ação -->
                         <div class="flex justify-between items-center">
                             <div>
-                                <?php if ($editAluno): ?>
-                                    <a href="alunos.php" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
-                                        <i class="fas fa-times mr-2"></i>Cancelar
-                                    </a>
-                                <?php endif; ?>
+                                <a href="alunos.php" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                                    <i class="fas fa-times mr-2"></i>Cancelar
+                                </a>
                             </div>
                             
                             <div>
                                 <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors shadow-md">
                                     <i class="fas fa-save mr-2"></i>
-                                    <?php echo $editAluno ? 'Atualizar Aluno' : 'Cadastrar Aluno'; ?>
+                                    Atualizar Aluno
                                 </button>
                             </div>
                         </div>
@@ -779,6 +776,7 @@ if (isset($_GET['edit'])) {
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Lista de Alunos -->
             <div class="data-table-container">
@@ -786,6 +784,11 @@ if (isset($_GET['edit'])) {
                     <h2 class="data-table-title">
                         <i class="fas fa-users"></i>Lista de Alunos
                     </h2>
+                    <div class="flex items-center space-x-2">
+                        <a href="cadastro_aluno.php" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors flex items-center">
+                            <i class="fas fa-plus mr-2"></i>Novo Cadastro
+                        </a>
+                    </div>
                     <div class="search-container">
                         <form method="GET" class="search-form">
                             <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" class="search-input" placeholder="Buscar por nome, CPF ou email...">
