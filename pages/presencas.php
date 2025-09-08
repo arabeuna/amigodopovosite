@@ -192,7 +192,7 @@ if ($turma_selecionada) {
             </button>
             
             <div class="flex items-center mb-8">
-                <img src="../assets/images/logo_associacao.svg" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
+                <img src="../assets/images/icon-192x192 (1).png" alt="Logo" class="logo logo-sm logo-sidebar mr-3">
                 <h2 class="text-xl font-bold sidebar-title"><?php echo SITE_NAME; ?></h2>
             </div>
             <nav class="sidebar-nav space-y-2">
