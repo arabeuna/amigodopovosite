@@ -48,6 +48,22 @@ composer.lock
 
 # Database
 *.sql.backup
+
+# Test and debug files
+debug_formulario.php
+logs_cadastro.txt
+logs_cadastro_corrigido.txt
+test_cadastro.php
+test_cadastro_corrigido.php
+test_cadastro_logs.php
+test_connection.php
+teste_cadastro_debug.php
+teste_cadastro_simples.php
+teste_final_cadastro.php
+teste_final_logs.txt
+teste_pdf_melhorado.php
+teste_post.php
+verificar_tabela.php
 *.db
 *.sqlite
 
