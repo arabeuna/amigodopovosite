@@ -109,7 +109,7 @@ $pdf->SetTextColor(0, 0, 0);
 // Espaço inicial - ajustar conforme a página
 if ($pdf->getPage() == 1) {
     // Primeira página tem cabeçalho, precisa de mais espaço
-    $pdf->Ln(8);
+    $pdf->Ln(15);
 } else {
     // Páginas subsequentes não têm cabeçalho
     $pdf->Ln(3);
