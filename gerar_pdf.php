@@ -43,36 +43,39 @@ try {
 class MYPDF extends TCPDF {
     // Cabeçalho personalizado
     public function Header() {
-        // Logo da associação (posicionamento melhorado)
-        $logo_path = 'assets/images/logo_associacao.jpg';
-        if (file_exists($logo_path)) {
-            $this->Image($logo_path, 15, 8, 25, 25, '', '', '', false, 300, '', false, false, 1);
+        // Exibir cabeçalho apenas na primeira página
+        if ($this->getPage() == 1) {
+            // Logo da associação (posicionamento melhorado)
+            $logo_path = 'assets/images/logo_associacao.jpg';
+            if (file_exists($logo_path)) {
+                $this->Image($logo_path, 15, 8, 25, 25, '', '', '', false, 300, '', false, false, 1);
+            }
+            
+            // Título principal (melhor posicionamento)
+            $this->SetFont('helvetica', 'B', 16);
+            $this->SetTextColor(0, 51, 102);
+            $this->SetXY(45, 12);
+            $this->Cell(0, 8, 'FICHA DE CADASTRO DE ALUNO', 0, false, 'L', 0, '', 0, false, 'M', 'M');
+            
+            // Subtítulo (melhor espaçamento)
+            $this->SetFont('helvetica', '', 11);
+            $this->SetTextColor(80, 80, 80);
+            $this->SetXY(45, 20);
+            $this->Cell(0, 6, 'Associação Amigo do Povo', 0, false, 'L', 0, '', 0, false, 'M', 'M');
+            
+            // Data de geração (canto superior direito)
+            $this->SetFont('helvetica', '', 8);
+            $this->SetTextColor(120, 120, 120);
+            $this->SetXY(150, 10);
+            $this->Cell(0, 4, 'Gerado em: ' . date('d/m/Y'), 0, false, 'R', 0, '', 0, false, 'T', 'M');
+            
+            // Linha separadora (mais elegante)
+            $this->SetDrawColor(0, 51, 102);
+            $this->SetLineWidth(0.5);
+            $this->Line(15, 33, 195, 33);
+            
+            $this->Ln(28);
         }
-        
-        // Título principal (melhor posicionamento)
-        $this->SetFont('helvetica', 'B', 16);
-        $this->SetTextColor(0, 51, 102);
-        $this->SetXY(45, 12);
-        $this->Cell(0, 8, 'FICHA DE CADASTRO DE ALUNO', 0, false, 'L', 0, '', 0, false, 'M', 'M');
-        
-        // Subtítulo (melhor espaçamento)
-        $this->SetFont('helvetica', '', 11);
-        $this->SetTextColor(80, 80, 80);
-        $this->SetXY(45, 20);
-        $this->Cell(0, 6, 'Associação Amigo do Povo', 0, false, 'L', 0, '', 0, false, 'M', 'M');
-        
-        // Data de geração (canto superior direito)
-        $this->SetFont('helvetica', '', 8);
-        $this->SetTextColor(120, 120, 120);
-        $this->SetXY(150, 10);
-        $this->Cell(0, 4, 'Gerado em: ' . date('d/m/Y'), 0, false, 'R', 0, '', 0, false, 'T', 'M');
-        
-        // Linha separadora (mais elegante)
-        $this->SetDrawColor(0, 51, 102);
-        $this->SetLineWidth(0.5);
-        $this->Line(15, 33, 195, 33);
-        
-        $this->Ln(28);
     }
     
     // Rodapé removido para evitar bugs de sobreposição entre páginas
@@ -90,7 +93,7 @@ $pdf->SetKeywords('cadastro, aluno, ficha');
 
 // Configurações da página
 $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-$pdf->SetMargins(15, 30, 15);
+$pdf->SetMargins(15, 15, 15);
 $pdf->SetHeaderMargin(5);
 $pdf->SetFooterMargin(0);
 $pdf->SetAutoPageBreak(TRUE, 15);
