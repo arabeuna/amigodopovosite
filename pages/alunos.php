@@ -509,6 +509,10 @@ if (isset($_GET['edit'])) {
                     <i class="fas fa-chart-bar"></i>
                     <span>Relatórios</span>
                 </a>
+                <a href="processar_csv.php" class="flex items-center space-x-3 text-gray-300 hover:bg-gray-700 p-3 rounded-lg transition duration-200">
+                    <i class="fas fa-file-csv"></i>
+                    <span>Importar CSV</span>
+                </a>
             </nav>
         </aside>
 

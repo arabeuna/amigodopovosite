@@ -150,8 +150,8 @@ if ($turma_selecionada) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Presenças - <?php echo SITE_NAME; ?></title>
-    <link rel="icon" type="image/png" href="../assets/images/logo_associacao.svg">
-    <link rel="apple-touch-icon" href="../assets/images/logo_associacao.svg">
+    <link rel="icon" type="image/png" href="../assets/images/icon-192x192 (1).png">
+    <link rel="apple-touch-icon" href="../assets/images/icon-192x192 (1).png">
     <link href="../assets/css/tailwind.min.css" rel="stylesheet">
     <link href="../assets/css/theme.css" rel="stylesheet">
     <link href="../assets/css/custom.css" rel="stylesheet">
@@ -166,7 +166,7 @@ if ($turma_selecionada) {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center">
-                    <img src="../assets/images/logo_associacao.svg" alt="Logo" class="logo logo-md logo-header mr-3">
+                    <img src="../assets/images/icon-192x192 (1).png" alt="Logo" class="logo logo-md logo-header mr-3">
                     <h1 class="text-xl font-semibold"><?php echo SITE_NAME; ?></h1>
                     <span class="text-blue-200 ml-4">Controle de Presenças</span>
                 </div>

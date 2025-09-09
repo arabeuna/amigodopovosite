@@ -561,8 +561,13 @@ switch ($relatorio_tipo) {
                                                 'cancelada' => 'Cancelada'
                                             ];
                                             ?>
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <?php echo $statusColors[$item['status']]; ?>">
-                                                <?php echo $statusLabels[$item['status']]; ?>
+                                            <?php 
+                                            $status = $item['status'] ?? 'ativa'; // Default para 'ativa' se não definido
+                                            $statusColor = $statusColors[$status] ?? 'bg-gray-100 text-gray-800'; // Default se status não encontrado
+                                            $statusLabel = $statusLabels[$status] ?? 'Indefinido'; // Default se status não encontrado
+                                            ?>
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <?php echo $statusColor; ?>">
+                                                <?php echo $statusLabel; ?>
                                             </span>
                                         </td>
                                     </tr>

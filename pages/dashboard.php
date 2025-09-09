@@ -105,9 +105,21 @@ try {
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="aniversariantes.php" class="nav-link">
+                            <i class="nav-icon fas fa-birthday-cake"></i>
+                            Aniversariantes
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="relatorios.php" class="nav-link">
                             <i class="nav-icon fas fa-chart-bar"></i>
                             Relatórios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="processar_csv.php" class="nav-link">
+                            <i class="nav-icon fas fa-file-csv"></i>
+                            Importar CSV
                         </a>
                     </li>
                 </ul>
