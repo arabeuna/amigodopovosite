@@ -1,14 +1,15 @@
 <?php
 require_once '../config/config.php';
 require_once '../config/database.php';
+require_once '../includes/auth.php';
 session_start();
 
 // Inicializar conexão com banco de dados
 $database = new Database();
-$db = $database;
+$auth = new AuthSystem($database);
 
 // Se já estiver logado, redirecionar para dashboard
-if (isset($_SESSION['user_id'])) {
+if ($auth->isLoggedIn()) {
     redirect('../pages/dashboard.php');
 }
 
@@ -21,32 +22,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($email) || empty($password)) {
         $error = 'Por favor, preencha todos os campos.';
     } else {
-        try {
-            // Buscar usuário no banco
-            $stmt = $db->query(
-                "SELECT id, nome, email, senha, ativo FROM usuarios WHERE email = ? AND ativo = 1",
-                [$email]
-            );
-            $user = $stmt->fetch();
-            
-            if ($user && password_verify($password, $user['senha'])) {
-                // Login bem-sucedido
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['nome'];
-                $_SESSION['user_email'] = $user['email'];
-                
-                // Atualizar último login
-                $db->query(
-                    "UPDATE usuarios SET ultimo_login = NOW() WHERE id = ?",
-                    [$user['id']]
-                );
-                
-                redirect('../pages/dashboard.php');
-            } else {
-                $error = 'Email ou senha incorretos.';
-            }
-        } catch (Exception $e) {
-            $error = 'Erro interno do sistema. Tente novamente.';
+        $ip_address = $_SERVER['REMOTE_ADDR'] ?? null;
+        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+        
+        $result = $auth->login($email, $password, $ip_address, $user_agent);
+        
+        if ($result['success']) {
+            redirect('../pages/dashboard.php');
+        } else {
+            $error = $result['message'];
         }
     }
 }
@@ -108,8 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
         
         <div class="mt-6 text-center text-sm text-gray-600">
-            <p>Usuário padrão: admin@associacao.com</p>
-            <p>Senha padrão: admin123</p>
+            <p><strong>Usuário Master:</strong> master@associacao.com</p>
+            <p><strong>Usuário Admin:</strong> admin@associacao.com</p>
+            <p><strong>Senha padrão:</strong> admin123</p>
         </div>
     </div>
 </body>

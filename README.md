@@ -4,10 +4,14 @@ Sistema web desenvolvido em PHP para gestão de atividades, alunos, turmas e mat
 
 ## 🚀 Funcionalidades
 
-### Autenticação
-- Sistema de login seguro
-- Controle de sessão
+### Sistema de Autenticação
+- Sistema de login seguro com níveis de permissão
+- Controle de sessão avançado
 - Logout automático
+- **Níveis de acesso**: Master, Admin, User
+- **Dashboard Master**: Interface completa de administração
+- **Logs de Auditoria**: Rastreamento de todas as ações
+- **Gerenciamento de Usuários**: Criação e edição de contas
 
 ### Gestão de Alunos
 - Cadastro completo de alunos
@@ -194,6 +198,80 @@ associacao-php/
 - App mobile
 - Relatórios avançados
 - Sistema de mensagens
+
+## 🔧 Instalação e Configuração
+
+### Pré-requisitos
+- XAMPP (Apache + MySQL + PHP 7.4+)
+- Navegador web moderno
+- Git (para clonagem do repositório)
+
+### 1. Clone o repositório
+```bash
+git clone [URL_DO_REPOSITORIO]
+cd associacao-php
+```
+
+### 2. Configure o ambiente
+1. Inicie o XAMPP (Apache e MySQL)
+2. Copie o projeto para `C:\xampp\htdocs\associacao-php`
+
+### 3. Configure o banco de dados
+
+1. **Copie o arquivo de configuração:**
+```bash
+cp config/database.example.php config/database.php
+```
+
+2. **Edite `config/database.php` com suas configurações:**
+```php
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'associacao_amigo_povo');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+```
+
+3. **Crie o banco de dados:**
+```sql
+CREATE DATABASE associacao_amigo_povo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+4. **Execute os scripts SQL:**
+```bash
+# Estrutura principal
+mysql -u root -p associacao_amigo_povo < database/schema.sql
+
+# Tabelas de autenticação
+mysql -u root -p associacao_amigo_povo < database/auth_tables.sql
+```
+
+### 4. Acesse o sistema
+Abra o navegador e acesse: `http://localhost/associacao-php`
+
+### 👤 Usuário Padrão
+Após a instalação, use as credenciais padrão:
+- **Email**: master@associacao.com
+- **Senha**: master123
+- **Tipo**: Master (acesso total)
+
+⚠️ **Importante**: Altere a senha padrão após o primeiro acesso!
+
+### 📁 Estrutura do Projeto
+```
+associacao-php/
+├── api/                    # APIs REST
+├── assets/                 # Recursos estáticos
+│   ├── css/               # Estilos CSS
+│   ├── js/                # Scripts JavaScript
+│   └── images/            # Imagens
+├── auth/                   # Sistema de autenticação
+├── config/                 # Configurações
+├── database/               # Scripts SQL
+├── includes/               # Arquivos de inclusão
+├── pages/                  # Páginas do sistema
+├── tcpdf/                  # Biblioteca PDF
+└── index.php              # Página inicial
+```
 
 ## 🐛 Solução de Problemas
 

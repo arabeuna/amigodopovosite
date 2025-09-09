@@ -1,6 +1,7 @@
 <?php
 require_once '../config/config.php';
 require_once '../config/database.php';
+require_once '../includes/middleware.php';
 session_start();
 
 // Verificar se o usuário está logado
@@ -11,6 +12,9 @@ if (!isset($_SESSION['user_id'])) {
 // Inicializar conexão com banco de dados
 $database = new Database();
 $db = $database;
+
+// Inicializar middleware de logging
+$logger = initLoggingMiddleware($database);
 
 $message = '';
 $error = '';
