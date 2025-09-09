@@ -52,12 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($capacidade && $capacidade['matriculados'] >= $capacidade['capacidade_maxima']) {
                         $error = 'Turma já atingiu a capacidade máxima';
                     } else {
-                        $sql = "INSERT INTO matriculas (aluno_id, turma_id, data_matricula, observacoes) VALUES (?, ?, ?, ?)";
-                        $stmt = $db->prepare($sql);
-                        if ($stmt->execute([$aluno_id, $turma_id, $data_matricula, $observacoes])) {
-                            $message = 'Matrícula realizada com sucesso!';
+                        // Verificar se já existe matrícula ativa para este aluno nesta turma
+                        $checkStmt = $db->prepare("SELECT id FROM matriculas WHERE aluno_id = ? AND turma_id = ? AND status = 'ativa'");
+                        $checkStmt->execute([$aluno_id, $turma_id]);
+                        
+                        if ($checkStmt->fetch()) {
+                            $error = 'Este aluno já está matriculado nesta turma';
                         } else {
-                            $error = 'Erro ao realizar matrícula';
+                            $sql = "INSERT INTO matriculas (aluno_id, turma_id, data_matricula, observacoes) VALUES (?, ?, ?, ?)";
+                            $stmt = $db->prepare($sql);
+                            if ($stmt->execute([$aluno_id, $turma_id, $data_matricula, $observacoes])) {
+                                $message = 'Matrícula realizada com sucesso!';
+                            } else {
+                                $error = 'Erro ao realizar matrícula';
+                            }
                         }
                     }
                 }
