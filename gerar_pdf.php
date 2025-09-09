@@ -9,30 +9,32 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $aluno_id = (int)$_GET['id'];
 
-// Buscar dados do aluno e matrícula no banco de dados
+// Buscar dados do aluno e matrículas no banco de dados
 try {
     $database = new Database();
-    $sql = "
-        SELECT a.*, 
-               m.data_matricula, m.status as status_matricula,
-               t.nome as turma_nome, t.horario_inicio, t.horario_fim,
-               at.nome as atividade_nome, at.descricao as atividade_descricao
-        FROM alunos a
-        LEFT JOIN matriculas m ON a.id = m.aluno_id AND m.status = 'ativa'
-        LEFT JOIN turmas t ON m.turma_id = t.id
-        LEFT JOIN atividades at ON t.atividade_id = at.id
-        WHERE a.id = ?
-        ORDER BY m.data_matricula DESC
-    ";
-    $stmt = $database->query($sql, [$aluno_id]);
-    $matriculas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    if (!$matriculas) {
-        die('Aluno não encontrado ou sem matrículas ativas.');
+    // Primeiro, buscar dados básicos do aluno
+    $sql_aluno = "SELECT * FROM alunos WHERE id = ?";
+    $stmt_aluno = $database->query($sql_aluno, [$aluno_id]);
+    $aluno = $stmt_aluno->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$aluno) {
+        die('Aluno não encontrado.');
     }
     
-    // Pegar dados do aluno do primeiro registro
-    $aluno = $matriculas[0];
+    // Depois, buscar todas as matrículas ativas do aluno
+    $sql_matriculas = "
+        SELECT m.data_matricula, m.status as status_matricula,
+               t.nome as turma_nome, t.horario_inicio, t.horario_fim,
+               at.nome as atividade_nome, at.descricao as atividade_descricao
+        FROM matriculas m
+        INNER JOIN turmas t ON m.turma_id = t.id
+        INNER JOIN atividades at ON t.atividade_id = at.id
+        WHERE m.aluno_id = ? AND m.status = 'ativa'
+        ORDER BY m.data_matricula DESC
+    ";
+    $stmt_matriculas = $database->query($sql_matriculas, [$aluno_id]);
+    $matriculas = $stmt_matriculas->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die('Erro ao buscar dados do aluno: ' . $e->getMessage());
 }
@@ -359,82 +361,85 @@ if (!empty($aluno['nome_responsavel'])) {
 }
 
 // Seção Matrículas com design melhorado
+$pdf->SetFont('helvetica', 'B', 13);
+$pdf->SetTextColor(0, 51, 102);
+$pdf->Cell(0, 8, 'INFORMAÇÕES DAS MATRÍCULAS', 0, 1);
+
+// Linha decorativa
+$pdf->SetDrawColor(0, 51, 102);
+$pdf->SetLineWidth(0.4);
+$pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+$pdf->Ln(5);
+
+$pdf->SetFont('helvetica', '', 10);
+$pdf->SetTextColor(0, 0, 0);
+
 if (!empty($matriculas)) {
-    $pdf->SetFont('helvetica', 'B', 13);
-    $pdf->SetTextColor(0, 51, 102);
-    $pdf->Cell(0, 8, 'INFORMAÇÕES DAS MATRÍCULAS', 0, 1);
-    
-    // Linha decorativa
-    $pdf->SetDrawColor(0, 51, 102);
-    $pdf->SetLineWidth(0.4);
-    $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
-    $pdf->Ln(5);
-    
-    $pdf->SetFont('helvetica', '', 10);
-    $pdf->SetTextColor(0, 0, 0);
-    
     // Percorrer todas as matrículas ativas
     foreach ($matriculas as $index => $matricula) {
-        if (!empty($matricula['atividade_nome']) || !empty($matricula['turma_nome'])) {
-            // Se há mais de uma matrícula, adicionar numeração
-            if (count($matriculas) > 1) {
-                $pdf->SetFont('helvetica', 'B', 10);
-                $pdf->SetTextColor(0, 51, 102);
-                $pdf->Cell(0, 6, 'Matrícula ' . ($index + 1) . ':', 0, 1);
-                $pdf->SetTextColor(0, 0, 0);
-                $pdf->Ln(2);
-            }
+        // Se há mais de uma matrícula, adicionar numeração
+        if (count($matriculas) > 1) {
+            $pdf->SetFont('helvetica', 'B', 10);
+            $pdf->SetTextColor(0, 51, 102);
+            $pdf->Cell(0, 6, 'Matrícula ' . ($index + 1) . ':', 0, 1);
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->Ln(2);
+        }
+        
+        // Atividade
+        if (!empty($matricula['atividade_nome'])) {
+            $pdf->SetFont('helvetica', 'B', 9);
+            $pdf->Cell(25, 6, 'Atividade:', 0, 0);
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->Cell(0, 6, $matricula['atividade_nome'], 0, 1);
             
-            // Atividade
-            if (!empty($matricula['atividade_nome'])) {
+            if (!empty($matricula['atividade_descricao'])) {
                 $pdf->SetFont('helvetica', 'B', 9);
-                $pdf->Cell(25, 6, 'Atividade:', 0, 0);
+                $pdf->Cell(25, 6, 'Descrição:', 0, 0);
                 $pdf->SetFont('helvetica', '', 9);
-                $pdf->Cell(0, 6, $matricula['atividade_nome'], 0, 1);
-                
-                if (!empty($matricula['atividade_descricao'])) {
-                    $pdf->SetFont('helvetica', 'B', 9);
-                    $pdf->Cell(25, 6, 'Descrição:', 0, 0);
-                    $pdf->SetFont('helvetica', '', 9);
-                    $pdf->Cell(0, 6, $matricula['atividade_descricao'], 0, 1);
-                }
-            }
-            
-            // Turma e Horário
-            if (!empty($matricula['turma_nome'])) {
-                $pdf->SetFont('helvetica', 'B', 9);
-                $pdf->Cell(25, 6, 'Turma:', 0, 0);
-                $pdf->SetFont('helvetica', '', 9);
-                $turma_info = $matricula['turma_nome'];
-                if (!empty($matricula['horario_inicio']) && !empty($matricula['horario_fim'])) {
-                    $turma_info .= ' - ' . date('H:i', strtotime($matricula['horario_inicio'])) . ' às ' . date('H:i', strtotime($matricula['horario_fim']));
-                }
-                $pdf->Cell(0, 6, $turma_info, 0, 1);
-            }
-            
-            // Data de Matrícula e Status
-            if (!empty($matricula['data_matricula'])) {
-                $pdf->SetFont('helvetica', 'B', 9);
-                $pdf->Cell(30, 6, 'Data da Matrícula:', 0, 0);
-                $pdf->SetFont('helvetica', '', 9);
-                $data_matricula = date('d/m/Y', strtotime($matricula['data_matricula']));
-                $pdf->Cell(50, 6, $data_matricula, 0, 0);
-                
-                $pdf->SetFont('helvetica', 'B', 9);
-                $pdf->Cell(20, 6, 'Status:', 0, 0);
-                $pdf->SetFont('helvetica', '', 9);
-                $pdf->Cell(0, 6, $matricula['status_matricula'] ?? 'Ativo', 0, 1);
-            }
-            
-            // Espaçamento entre matrículas
-            if ($index < count($matriculas) - 1) {
-                $pdf->Ln(3);
+                $pdf->Cell(0, 6, $matricula['atividade_descricao'], 0, 1);
             }
         }
+        
+        // Turma e Horário
+        if (!empty($matricula['turma_nome'])) {
+            $pdf->SetFont('helvetica', 'B', 9);
+            $pdf->Cell(25, 6, 'Turma:', 0, 0);
+            $pdf->SetFont('helvetica', '', 9);
+            $turma_info = $matricula['turma_nome'];
+            if (!empty($matricula['horario_inicio']) && !empty($matricula['horario_fim'])) {
+                $turma_info .= ' - ' . date('H:i', strtotime($matricula['horario_inicio'])) . ' às ' . date('H:i', strtotime($matricula['horario_fim']));
+            }
+            $pdf->Cell(0, 6, $turma_info, 0, 1);
+        }
+        
+        // Data de Matrícula e Status
+        if (!empty($matricula['data_matricula'])) {
+            $pdf->SetFont('helvetica', 'B', 9);
+            $pdf->Cell(30, 6, 'Data da Matrícula:', 0, 0);
+            $pdf->SetFont('helvetica', '', 9);
+            $data_matricula = date('d/m/Y', strtotime($matricula['data_matricula']));
+            $pdf->Cell(50, 6, $data_matricula, 0, 0);
+            
+            $pdf->SetFont('helvetica', 'B', 9);
+            $pdf->Cell(20, 6, 'Status:', 0, 0);
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->Cell(0, 6, $matricula['status_matricula'] ?? 'Ativo', 0, 1);
+        }
+        
+        // Espaçamento entre matrículas
+        if ($index < count($matriculas) - 1) {
+            $pdf->Ln(3);
+        }
     }
-    
-    $pdf->Ln(5);
+} else {
+    // Caso não tenha matrículas ativas
+    $pdf->SetFont('helvetica', 'I', 9);
+    $pdf->SetTextColor(120, 120, 120);
+    $pdf->Cell(0, 6, 'Nenhuma matrícula ativa encontrada.', 0, 1);
 }
+
+$pdf->Ln(5);
 
 // Seção Observações com design melhorado
 if (!empty($aluno['observacoes'])) {
