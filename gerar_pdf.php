@@ -106,8 +106,14 @@ $pdf->AddPage();
 $pdf->SetFont('helvetica', '', 10);
 $pdf->SetTextColor(0, 0, 0);
 
-// Espaço inicial (título já está no cabeçalho)
-$pdf->Ln(3);
+// Espaço inicial - ajustar conforme a página
+if ($pdf->getPage() == 1) {
+    // Primeira página tem cabeçalho, precisa de mais espaço
+    $pdf->Ln(8);
+} else {
+    // Páginas subsequentes não têm cabeçalho
+    $pdf->Ln(3);
+}
 
 // Área da foto (posicionamento melhorado)
 $foto_x = 15;
