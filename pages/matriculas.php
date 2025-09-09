@@ -471,13 +471,19 @@ $stats = $statsStmt->fetch();
                                             'suspensa' => 'Suspensa',
                                             'cancelada' => 'Cancelada'
                                         ];
+                                        
+                                        // Garantir que o status existe e tem um valor válido
+                                        $currentStatus = $matricula['status'] ?? 'ativa';
+                                        if (!isset($statusColors[$currentStatus])) {
+                                            $currentStatus = 'ativa';
+                                        }
                                         ?>
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <?php echo $statusColors[$matricula['status']]; ?>">
-                                            <?php echo $statusLabels[$matricula['status']]; ?>
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <?php echo $statusColors[$currentStatus]; ?>">
+                                            <?php echo $statusLabels[$currentStatus]; ?>
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <?php if ($matricula['status'] === 'ativa'): ?>
+                                        <?php if ($currentStatus === 'ativa'): ?>
                                             <form method="POST" class="inline mr-2">
                                                 <input type="hidden" name="action" value="update_status">
                                                 <input type="hidden" name="id" value="<?php echo $matricula['id']; ?>">
@@ -496,7 +502,7 @@ $stats = $statsStmt->fetch();
                                                     <i class="fas fa-times"></i> Cancelar
                                                 </button>
                                             </form>
-                                        <?php elseif ($matricula['status'] === 'suspensa'): ?>
+                                        <?php elseif ($currentStatus === 'suspensa'): ?>
                                             <form method="POST" class="inline mr-2">
                                                 <input type="hidden" name="action" value="update_status">
                                                 <input type="hidden" name="id" value="<?php echo $matricula['id']; ?>">
