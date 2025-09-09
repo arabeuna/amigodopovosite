@@ -228,7 +228,7 @@ class AuthSystem {
     /**
      * Obter logs detalhados para auditoria
      */
-    public function getAuditLogs($filtros = []) {
+    public function getAuditLogs($filtros = [], $limit = 50, $offset = 0) {
         $where = ["1=1"];
         $params = [];
         
@@ -257,21 +257,80 @@ class AuthSystem {
             $params[] = $filtros['data_fim'];
         }
         
+        if (!empty($filtros['ip'])) {
+            $where[] = "l.ip_address LIKE ?";
+            $params[] = '%' . $filtros['ip'] . '%';
+        }
+        
         $where_clause = implode(' AND ', $where);
+        
+        // Adicionar parâmetros de paginação
+        $params[] = $limit;
+        $params[] = $offset;
         
         $stmt = $this->db->query("
             SELECT 
                 l.*,
                 u.nome as usuario_nome,
-                u.email as usuario_email
+                u.email as usuario_email,
+                u.tipo as usuario_tipo
             FROM logs_auditoria l
             LEFT JOIN usuarios u ON l.usuario_id = u.id
             WHERE $where_clause
             ORDER BY l.data_acao DESC
-            LIMIT 1000
+            LIMIT ? OFFSET ?
         ", $params);
         
         return $stmt->fetchAll();
+    }
+    
+    /**
+     * Contar total de logs para paginação
+     */
+    public function countAuditLogs($filtros = []) {
+        $where = ["1=1"];
+        $params = [];
+        
+        if (!empty($filtros['usuario_id'])) {
+            $where[] = "l.usuario_id = ?";
+            $params[] = $filtros['usuario_id'];
+        }
+        
+        if (!empty($filtros['acao'])) {
+            $where[] = "l.acao = ?";
+            $params[] = $filtros['acao'];
+        }
+        
+        if (!empty($filtros['modulo'])) {
+            $where[] = "l.modulo = ?";
+            $params[] = $filtros['modulo'];
+        }
+        
+        if (!empty($filtros['data_inicio'])) {
+            $where[] = "DATE(l.data_acao) >= ?";
+            $params[] = $filtros['data_inicio'];
+        }
+        
+        if (!empty($filtros['data_fim'])) {
+            $where[] = "DATE(l.data_acao) <= ?";
+            $params[] = $filtros['data_fim'];
+        }
+        
+        if (!empty($filtros['ip'])) {
+            $where[] = "l.ip_address LIKE ?";
+            $params[] = '%' . $filtros['ip'] . '%';
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        
+        $stmt = $this->db->query("
+            SELECT COUNT(*) as total
+            FROM logs_auditoria l
+            LEFT JOIN usuarios u ON l.usuario_id = u.id
+            WHERE $where_clause
+        ", $params);
+        
+        return $stmt->fetch()['total'];
     }
 }
 

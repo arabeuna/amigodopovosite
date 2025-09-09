@@ -153,12 +153,63 @@ foreach ($permissoes as $permissao) {
     
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">
-                <i class="fas fa-users-cog mr-3"></i>Gerenciar Usuários
-            </h1>
-            <button onclick="openCreateUserModal()" class="btn-primary">
-                <i class="fas fa-plus mr-2"></i>Novo Usuário
-            </button>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Gerenciar Usuários</h1>
+                <p class="text-gray-600 mt-2">Gerencie usuários e suas permissões no sistema</p>
+            </div>
+            <div>
+                <button onclick="openCreateUserModal()" class="btn-primary">
+                    <i class="fas fa-plus mr-2"></i>Novo Usuário
+                </button>
+            </div>
+        </div>
+        
+        <!-- Painel de Estatísticas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total de Usuários</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= count($usuarios) ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-user-check text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Usuários Ativos</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= count(array_filter($usuarios, fn($u) => $u['ativo'])) ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-user-shield text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Administradores</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= count(array_filter($usuarios, fn($u) => in_array($u['tipo'], ['admin', 'master']))) ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Logins Hoje</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= count(array_filter($usuarios, fn($u) => $u['ultimo_login'] && date('Y-m-d', strtotime($u['ultimo_login'])) === date('Y-m-d'))) ?></p>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <?php if ($message): ?>
@@ -401,5 +452,5 @@ foreach ($permissoes as $permissao) {
             }
         });
     </script>
-</body>
-</html>
+
+<?php include '../includes/footer.php'; ?>

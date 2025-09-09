@@ -91,11 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </form>
         
-        <div class="mt-6 text-center text-sm text-gray-600">
-            <p><strong>Usuário Master:</strong> master@associacao.com</p>
-            <p><strong>Usuário Admin:</strong> admin@associacao.com</p>
-            <p><strong>Senha padrão:</strong> admin123</p>
-        </div>
+
     </div>
 </body>
 </html>

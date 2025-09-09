@@ -35,37 +35,16 @@ if (!empty($_GET['ip'])) $filtros['ip'] = $_GET['ip'];
 $logs = $auth->getAuditLogs($filtros, $per_page, $offset);
 
 // Contar total de registros para paginação
-$where_conditions = [];
-$params = [];
-
-if (!empty($filtros['data_inicio'])) {
-    $where_conditions[] = "DATE(data_acao) >= ?";
-    $params[] = $filtros['data_inicio'];
-}
-if (!empty($filtros['data_fim'])) {
-    $where_conditions[] = "DATE(data_acao) <= ?";
-    $params[] = $filtros['data_fim'];
-}
-if (!empty($filtros['usuario_id'])) {
-    $where_conditions[] = "usuario_id = ?";
-    $params[] = $filtros['usuario_id'];
-}
-if (!empty($filtros['acao'])) {
-    $where_conditions[] = "acao = ?";
-    $params[] = $filtros['acao'];
-}
-if (!empty($filtros['modulo'])) {
-    $where_conditions[] = "modulo = ?";
-    $params[] = $filtros['modulo'];
-}
-if (!empty($filtros['ip'])) {
-    $where_conditions[] = "ip_address LIKE ?";
-    $params[] = '%' . $filtros['ip'] . '%';
-}
-
-$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-$total_logs = $database->query("SELECT COUNT(*) as total FROM logs_auditoria $where_clause", $params)->fetch()['total'];
+$total_logs = $auth->countAuditLogs($filtros);
 $total_pages = ceil($total_logs / $per_page);
+
+// Estatísticas rápidas
+$stats = [
+    'total_logs' => $total_logs,
+    'logs_hoje' => $auth->countAuditLogs(array_merge($filtros, ['data_inicio' => date('Y-m-d'), 'data_fim' => date('Y-m-d')])),
+    'logs_semana' => $auth->countAuditLogs(array_merge($filtros, ['data_inicio' => date('Y-m-d', strtotime('-7 days')), 'data_fim' => date('Y-m-d')])),
+    'usuarios_ativos' => $database->query("SELECT COUNT(DISTINCT usuario_id) as total FROM logs_auditoria WHERE DATE(data_acao) = CURDATE()")->fetch()['total']
+];
 
 // Dados para filtros
 $usuarios = $database->query("SELECT id, nome FROM usuarios WHERE ativo = TRUE ORDER BY nome")->fetchAll();
@@ -102,6 +81,54 @@ $modulos = $database->query("SELECT DISTINCT modulo FROM logs_auditoria ORDER BY
             </div>
         </div>
         
+        <!-- Painel de Estatísticas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-list-alt text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total de Logs</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= number_format($stats['total_logs']) ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-calendar-day text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Logs Hoje</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= number_format($stats['logs_hoje']) ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <i class="fas fa-calendar-week text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Logs (7 dias)</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= number_format($stats['logs_semana']) ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Usuários Ativos Hoje</p>
+                        <p class="text-2xl font-bold text-gray-900"><?= number_format($stats['usuarios_ativos']) ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Filtros Avançados -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">
@@ -329,5 +356,5 @@ $modulos = $database->query("SELECT DISTINCT modulo FROM logs_auditoria ORDER BY
             window.open('export_logs.php?' + params.toString(), '_blank');
         }
     </script>
-</body>
-</html>
+
+<?php include '../includes/footer.php'; ?>

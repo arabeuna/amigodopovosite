@@ -1,13 +1,18 @@
-# Configurações do Apache para o projeto Associação PHP
+# Configurações do Apache para o projeto Associação PHP - PRODUÇÃO
 
-# Bloquear requisições do Vite que podem ser injetadas por extensões do navegador
+# Ativar RewriteEngine
 RewriteEngine On
+
+# Bloquear requisições do Vite
 RewriteRule ^@vite/ - [R=404,L]
 
-# Configurações de segurança
+# Configurações de segurança avançadas
 Header always set X-Content-Type-Options nosniff
 Header always set X-Frame-Options DENY
 Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
 # Configurações de cache para assets
 <IfModule mod_expires.c>
@@ -34,12 +39,50 @@ Header always set X-XSS-Protection "1; mode=block"
     AddOutputFilterByType DEFLATE application/x-javascript
 </IfModule>
 
-# Bloquear acesso a arquivos sensíveis
-<Files ~ "\.(env|log|ini)$">
+# Bloquear acesso a arquivos e pastas sensíveis
+<Files ~ "\.(env|log|ini|sql|md|json|lock|example)$">
     Order allow,deny
     Deny from all
 </Files>
 
-# Redirecionar para HTTPS em produção (descomentado quando necessário)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# Bloquear acesso a pastas de configuração
+RewriteRule ^(config|database|install)/ - [F,L]
+
+# Bloquear acesso a arquivos de backup
+RewriteRule \.(bak|backup|old|tmp)$ - [F,L]
+
+# Proteger contra ataques de injeção
+RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
+RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} ^.*\.(bash|git|hg|log|svn|swp|cvs) [NC,OR]
+RewriteCond %{QUERY_STRING} etc/passwd [NC,OR]
+RewriteCond %{QUERY_STRING} boot\.ini [NC,OR]
+RewriteCond %{QUERY_STRING} ftp\: [NC,OR]
+RewriteCond %{QUERY_STRING} http\: [NC,OR]
+RewriteCond %{QUERY_STRING} https\: [NC,OR]
+RewriteCond %{QUERY_STRING} \=PHP[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} [NC,OR]
+RewriteCond %{QUERY_STRING} \.\.\/ [NC,OR]
+RewriteCond %{QUERY_STRING} \+\+\+\+\+ [NC,OR]
+RewriteCond %{QUERY_STRING} \+\*\+\*\+ [NC,OR]
+RewriteCond %{QUERY_STRING} \< [NC,OR]
+RewriteCond %{QUERY_STRING} \> [NC,OR]
+RewriteCond %{QUERY_STRING} \' [NC,OR]
+RewriteCond %{QUERY_STRING} \%0A [NC,OR]
+RewriteCond %{QUERY_STRING} \%0D [NC,OR]
+RewriteCond %{QUERY_STRING} \%27 [NC,OR]
+RewriteCond %{QUERY_STRING} \%3C [NC,OR]
+RewriteCond %{QUERY_STRING} \%3E [NC,OR]
+RewriteCond %{QUERY_STRING} \%00 [NC]
+RewriteRule ^(.*)$ - [F,L]
+
+# Redirecionar para HTTPS em produção
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_HOST} !^localhost [NC]
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Página inicial padrão
+DirectoryIndex index.php
+
+# Bloquear acesso direto a arquivos PHP em certas pastas
+RewriteRule ^(includes|config)/.+\.php$ - [F,L]
