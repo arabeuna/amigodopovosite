@@ -1192,6 +1192,176 @@ if (isset($_GET['edit'])) {
             }
         }
         
+        // Funções para gerenciar matrículas - definidas globalmente
+        let alunoId = <?php echo isset($editAluno) ? $editAluno['id'] : 'null'; ?>;
+        
+        // Converter string 'null' para null real
+        if (alunoId === 'null') {
+            alunoId = null;
+        }
+        
+        // Carregar matrículas do aluno
+        function carregarMatriculas() {
+            if (!alunoId) return;
+            
+            fetch(`../api/matriculas.php?aluno_id=${alunoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const listaMatriculas = document.getElementById('lista-matriculas');
+                    if (data.success && data.matriculas.length > 0) {
+                        listaMatriculas.innerHTML = data.matriculas.map(matricula => `
+                            <div class="bg-white p-3 rounded border flex justify-between items-center">
+                                <div>
+                                    <strong>${matricula.atividade_nome}</strong> - ${matricula.turma_nome}<br>
+                                    <small class="text-gray-600">Matrícula: ${matricula.data_matricula} | Status: ${matricula.status}</small>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editarMatricula(${matricula.id})" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="excluirMatricula(${matricula.id})" class="text-red-600 hover:text-red-800">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        listaMatriculas.innerHTML = '<p class="text-gray-500 italic">Nenhuma matrícula ativa encontrada.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar matrículas:', error);
+                    document.getElementById('lista-matriculas').innerHTML = '<p class="text-red-500">Erro ao carregar matrículas.</p>';
+                });
+        }
+        
+        // Carregar atividades para o dropdown
+        function carregarAtividades() {
+            fetch('../api/atividades.php')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('nova-atividade');
+                    if (data.success) {
+                        select.innerHTML = '<option value="">Selecione uma atividade</option>' +
+                            data.atividades.map(atividade => 
+                                `<option value="${atividade.id}">${atividade.nome}</option>`
+                            ).join('');
+                    }
+                })
+                .catch(error => console.error('Erro ao carregar atividades:', error));
+        }
+        
+        // Carregar turmas para o dropdown
+        function carregarTurmas() {
+            fetch('../api/turmas.php')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('nova-turma');
+                    if (data.success) {
+                        select.innerHTML = '<option value="">Selecione uma turma</option>' +
+                            data.turmas.map(turma => 
+                                `<option value="${turma.id}">${turma.nome} - ${turma.horario_inicio} às ${turma.horario_fim}</option>`
+                            ).join('');
+                    }
+                })
+                .catch(error => console.error('Erro ao carregar turmas:', error));
+        }
+        
+        // Adicionar nova matrícula
+        function adicionarMatricula() {
+            const atividadeId = document.getElementById('nova-atividade').value;
+            const turmaId = document.getElementById('nova-turma').value;
+            
+            if (!atividadeId || !turmaId) {
+                alert('Por favor, selecione uma atividade e uma turma.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'create');
+            formData.append('aluno_id', alunoId);
+            formData.append('atividade_id', atividadeId);
+            formData.append('turma_id', turmaId);
+            
+            fetch('../api/matriculas.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Matrícula adicionada com sucesso!');
+                    carregarMatriculas();
+                    document.getElementById('nova-atividade').value = '';
+                    document.getElementById('nova-turma').value = '';
+                } else {
+                    alert('Erro ao adicionar matrícula: ' + (data.message || 'Erro desconhecido'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao adicionar matrícula.');
+            });
+        }
+        
+        // Editar matrícula
+        function editarMatricula(matriculaId) {
+            const novoStatus = prompt('Digite o novo status (ativa, suspensa, cancelada):');
+            if (novoStatus && ['ativa', 'suspensa', 'cancelada'].includes(novoStatus)) {
+                const formData = new FormData();
+                formData.append('action', 'update');
+                formData.append('id', matriculaId);
+                formData.append('status', novoStatus);
+                
+                fetch('../api/matriculas.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Matrícula atualizada com sucesso!');
+                        carregarMatriculas();
+                    } else {
+                        alert('Erro ao atualizar matrícula: ' + (data.message || 'Erro desconhecido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao atualizar matrícula.');
+                });
+            } else if (novoStatus !== null) {
+                alert('Status inválido. Use: ativa, suspensa ou cancelada');
+            }
+        }
+        
+        // Excluir matrícula
+        function excluirMatricula(matriculaId) {
+            if (confirm('Tem certeza que deseja excluir esta matrícula?')) {
+                const formData = new FormData();
+                formData.append('action', 'delete');
+                formData.append('id', matriculaId);
+                
+                fetch('../api/matriculas.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Matrícula excluída com sucesso!');
+                        carregarMatriculas();
+                    } else {
+                        alert('Erro ao excluir matrícula: ' + (data.message || 'Erro desconhecido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir matrícula.');
+                });
+            }
+        }
+
         // Gerenciamento de visualizações
         document.addEventListener('DOMContentLoaded', function() {
             const toggleBtn = document.getElementById('toggleView');
@@ -1305,173 +1475,7 @@ if (isset($_GET['edit'])) {
                 });
             }
             
-            // Funções para gerenciar matrículas
-            let alunoId = <?php echo isset($editAluno) ? $editAluno['id'] : 'null'; ?>;
-            
-            // Carregar matrículas do aluno
-            function carregarMatriculas() {
-                if (!alunoId) return;
-                
-                fetch(`../api/matriculas.php?aluno_id=${alunoId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const listaMatriculas = document.getElementById('lista-matriculas');
-                        if (data.success && data.matriculas.length > 0) {
-                            listaMatriculas.innerHTML = data.matriculas.map(matricula => `
-                                <div class="bg-white p-3 rounded border flex justify-between items-center">
-                                    <div>
-                                        <strong>${matricula.atividade_nome}</strong> - ${matricula.turma_nome}<br>
-                                        <small class="text-gray-600">Matrícula: ${matricula.data_matricula} | Status: ${matricula.status}</small>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <button onclick="editarMatricula(${matricula.id})" class="text-blue-600 hover:text-blue-800">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button onclick="excluirMatricula(${matricula.id})" class="text-red-600 hover:text-red-800">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            `).join('');
-                        } else {
-                            listaMatriculas.innerHTML = '<p class="text-gray-500 italic">Nenhuma matrícula ativa encontrada.</p>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro ao carregar matrículas:', error);
-                        document.getElementById('lista-matriculas').innerHTML = '<p class="text-red-500">Erro ao carregar matrículas.</p>';
-                    });
-            }
-            
-            // Carregar atividades para o dropdown
-            function carregarAtividades() {
-                fetch('../api/atividades.php')
-                    .then(response => response.json())
-                    .then(data => {
-                        const select = document.getElementById('nova-atividade');
-                        if (data.success) {
-                            select.innerHTML = '<option value="">Selecione uma atividade</option>' +
-                                data.atividades.map(atividade => 
-                                    `<option value="${atividade.id}">${atividade.nome}</option>`
-                                ).join('');
-                        }
-                    })
-                    .catch(error => console.error('Erro ao carregar atividades:', error));
-            }
-            
-            // Carregar turmas para o dropdown
-            function carregarTurmas() {
-                fetch('../api/turmas.php')
-                    .then(response => response.json())
-                    .then(data => {
-                        const select = document.getElementById('nova-turma');
-                        if (data.success) {
-                            select.innerHTML = '<option value="">Selecione uma turma</option>' +
-                                data.turmas.map(turma => 
-                                    `<option value="${turma.id}">${turma.nome} - ${turma.horario_inicio} às ${turma.horario_fim}</option>`
-                                ).join('');
-                        }
-                    })
-                    .catch(error => console.error('Erro ao carregar turmas:', error));
-            }
-            
-            // Adicionar nova matrícula
-            function adicionarMatricula() {
-                const atividadeId = document.getElementById('nova-atividade').value;
-                const turmaId = document.getElementById('nova-turma').value;
-                
-                if (!atividadeId || !turmaId) {
-                    alert('Por favor, selecione uma atividade e uma turma.');
-                    return;
-                }
-                
-                const formData = new FormData();
-                formData.append('action', 'create');
-                formData.append('aluno_id', alunoId);
-                formData.append('atividade_id', atividadeId);
-                formData.append('turma_id', turmaId);
-                
-                fetch('../api/matriculas.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Matrícula adicionada com sucesso!');
-                        carregarMatriculas();
-                        document.getElementById('nova-atividade').value = '';
-                        document.getElementById('nova-turma').value = '';
-                    } else {
-                        alert('Erro ao adicionar matrícula: ' + (data.message || 'Erro desconhecido'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert('Erro ao adicionar matrícula.');
-                });
-            }
-            
-            // Editar matrícula
-            function editarMatricula(matriculaId) {
-                // Implementar modal ou formulário inline para edição
-                const novoStatus = prompt('Digite o novo status (ativa, suspensa, cancelada):');
-                if (novoStatus && ['ativa', 'suspensa', 'cancelada'].includes(novoStatus)) {
-                    const formData = new FormData();
-                    formData.append('action', 'update');
-                    formData.append('id', matriculaId);
-                    formData.append('status', novoStatus);
-                    
-                    fetch('../api/matriculas.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Matrícula atualizada com sucesso!');
-                            carregarMatriculas();
-                        } else {
-                            alert('Erro ao atualizar matrícula: ' + (data.message || 'Erro desconhecido'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                        alert('Erro ao atualizar matrícula.');
-                    });
-                } else if (novoStatus !== null) {
-                    alert('Status inválido. Use: ativa, suspensa ou cancelada');
-                }
-            }
-            
-            // Excluir matrícula
-            function excluirMatricula(matriculaId) {
-                if (confirm('Tem certeza que deseja excluir esta matrícula?')) {
-                    const formData = new FormData();
-                    formData.append('action', 'delete');
-                    formData.append('id', matriculaId);
-                    
-                    fetch('../api/matriculas.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Matrícula excluída com sucesso!');
-                            carregarMatriculas();
-                        } else {
-                            alert('Erro ao excluir matrícula: ' + (data.message || 'Erro desconhecido'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                        alert('Erro ao excluir matrícula.');
-                    });
-                }
-            }
-            
-            // Inicializar quando a página carregar
+            // Inicializar funções de matrícula quando a página carregar
             if (alunoId) {
                 carregarMatriculas();
                 carregarAtividades();
