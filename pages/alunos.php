@@ -1246,9 +1246,18 @@ if (isset($_GET['edit'])) {
                             data.atividades.map(atividade => 
                                 `<option value="${atividade.id}">${atividade.nome}</option>`
                             ).join('');
+                    } else {
+                        console.error('Erro na API de atividades:', data.message);
+                        if (data.message && data.message.includes('autorizado')) {
+                            alert('Sessão expirada. Por favor, faça login novamente.');
+                            window.location.href = '../auth/login.php';
+                        }
                     }
                 })
-                .catch(error => console.error('Erro ao carregar atividades:', error));
+                .catch(error => {
+                    console.error('Erro ao carregar atividades:', error);
+                    alert('Erro ao carregar atividades. Verifique sua conexão.');
+                });
         }
         
         // Carregar turmas para o dropdown
@@ -1262,9 +1271,18 @@ if (isset($_GET['edit'])) {
                             data.turmas.map(turma => 
                                 `<option value="${turma.id}">${turma.nome} - ${turma.horario_inicio} às ${turma.horario_fim}</option>`
                             ).join('');
+                    } else {
+                        console.error('Erro na API de turmas:', data.message);
+                        if (data.message && data.message.includes('autorizado')) {
+                            alert('Sessão expirada. Por favor, faça login novamente.');
+                            window.location.href = '../auth/login.php';
+                        }
                     }
                 })
-                .catch(error => console.error('Erro ao carregar turmas:', error));
+                .catch(error => {
+                    console.error('Erro ao carregar turmas:', error);
+                    alert('Erro ao carregar turmas. Verifique sua conexão.');
+                });
         }
         
         // Adicionar nova matrícula

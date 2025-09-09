@@ -18,7 +18,7 @@ header('Content-Type: application/json');
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // Buscar todas as atividades ativas
-        $sql = "SELECT id, nome, descricao FROM atividades WHERE status = 'ativa' ORDER BY nome";
+        $sql = "SELECT id, nome, descricao FROM atividades WHERE ativo = 1 ORDER BY nome";
         $stmt = $db->prepare($sql);
         $stmt->execute();
         $atividades = $stmt->fetchAll();

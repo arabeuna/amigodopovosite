@@ -21,10 +21,10 @@ try {
         if (isset($_GET['atividade_id'])) {
             $atividade_id = (int)$_GET['atividade_id'];
             
-            $sql = "SELECT t.id, t.nome, t.horario_inicio, t.horario_fim, t.dias_semana, t.vagas_total,
+            $sql = "SELECT t.id, t.nome, t.horario_inicio, t.horario_fim, t.dias_semana, t.capacidade_maxima as vagas_total,
                            (SELECT COUNT(*) FROM matriculas m WHERE m.turma_id = t.id AND m.status = 'ativa') as vagas_ocupadas
                     FROM turmas t 
-                    WHERE t.atividade_id = ? AND t.status = 'ativa'
+                    WHERE t.atividade_id = ? AND t.ativo = 1
                     ORDER BY t.nome";
             
             $stmt = $db->prepare($sql);
@@ -43,12 +43,12 @@ try {
             ]);
         } else {
             // Buscar todas as turmas ativas
-            $sql = "SELECT t.id, t.nome, t.horario_inicio, t.horario_fim, t.dias_semana, t.vagas_total,
+            $sql = "SELECT t.id, t.nome, t.horario_inicio, t.horario_fim, t.dias_semana, t.capacidade_maxima as vagas_total,
                            a.nome as atividade_nome,
                            (SELECT COUNT(*) FROM matriculas m WHERE m.turma_id = t.id AND m.status = 'ativa') as vagas_ocupadas
                     FROM turmas t 
                     LEFT JOIN atividades a ON t.atividade_id = a.id
-                    WHERE t.status = 'ativa'
+                    WHERE t.ativo = 1
                     ORDER BY a.nome, t.nome";
             
             $stmt = $db->prepare($sql);
