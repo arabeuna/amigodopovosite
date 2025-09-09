@@ -52,12 +52,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($capacidade && $capacidade['matriculados'] >= $capacidade['capacidade_maxima']) {
                         $error = 'Turma já atingiu a capacidade máxima';
                     } else {
-                        // Verificar se já existe matrícula ativa para este aluno nesta turma
-                        $checkStmt = $db->prepare("SELECT id FROM matriculas WHERE aluno_id = ? AND turma_id = ? AND status = 'ativa'");
+                        // Verificar se já existe matrícula para este aluno nesta turma (qualquer status)
+                        $checkStmt = $db->prepare("SELECT id, status FROM matriculas WHERE aluno_id = ? AND turma_id = ?");
                         $checkStmt->execute([$aluno_id, $turma_id]);
                         
-                        if ($checkStmt->fetch()) {
-                            $error = 'Este aluno já está matriculado nesta turma';
+                        $existingMatricula = $checkStmt->fetch();
+                        
+                        if ($existingMatricula) {
+                            if ($existingMatricula['status'] === 'ativa') {
+                                $error = 'Este aluno já está matriculado nesta turma';
+                            } else {
+                                // Reativar matrícula cancelada/suspensa
+                                $updateSql = "UPDATE matriculas SET status = 'ativa', data_matricula = ?, data_cancelamento = NULL, observacoes = ? WHERE id = ?";
+                                $updateStmt = $db->prepare($updateSql);
+                                if ($updateStmt->execute([$data_matricula, $observacoes, $existingMatricula['id']])) {
+                                    $message = 'Matrícula reativada com sucesso!';
+                                } else {
+                                    $error = 'Erro ao reativar matrícula';
+                                }
+                            }
                         } else {
                             $sql = "INSERT INTO matriculas (aluno_id, turma_id, data_matricula, observacoes) VALUES (?, ?, ?, ?)";
                             $stmt = $db->prepare($sql);
