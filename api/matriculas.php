@@ -25,8 +25,8 @@ try {
                            a.nome as atividade_nome, 
                            t.nome as turma_nome, t.horario_inicio, t.horario_fim
                     FROM matriculas m
-                    LEFT JOIN atividades a ON m.atividade_id = a.id
                     LEFT JOIN turmas t ON m.turma_id = t.id
+                    LEFT JOIN atividades a ON t.atividade_id = a.id
                     WHERE m.aluno_id = ? AND m.status = 'ativa'
                     ORDER BY m.data_matricula DESC";
             
@@ -52,7 +52,6 @@ try {
         switch ($action) {
             case 'create':
                 $aluno_id = (int)($_POST['aluno_id'] ?? 0);
-                $atividade_id = (int)($_POST['atividade_id'] ?? 0);
                 $turma_id = (int)($_POST['turma_id'] ?? 0);
                 
                 if ($aluno_id <= 0 || $turma_id <= 0) {
@@ -71,10 +70,10 @@ try {
                 }
                 
                 // Inserir nova matrícula
-                $sql = "INSERT INTO matriculas (aluno_id, atividade_id, turma_id, data_matricula, status) VALUES (?, ?, ?, NOW(), 'ativa')";
+                $sql = "INSERT INTO matriculas (aluno_id, turma_id, data_matricula, status) VALUES (?, ?, NOW(), 'ativa')";
                 $stmt = $db->prepare($sql);
                 
-                if ($stmt->execute([$aluno_id, $atividade_id, $turma_id])) {
+                if ($stmt->execute([$aluno_id, $turma_id])) {
                     echo json_encode(['success' => true, 'message' => 'Matrícula criada com sucesso']);
                 } else {
                     echo json_encode(['success' => false, 'message' => 'Erro ao criar matrícula']);

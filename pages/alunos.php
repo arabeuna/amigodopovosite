@@ -1298,7 +1298,6 @@ if (isset($_GET['edit'])) {
             const formData = new FormData();
             formData.append('action', 'create');
             formData.append('aluno_id', alunoId);
-            formData.append('atividade_id', atividadeId);
             formData.append('turma_id', turmaId);
             
             fetch('../api/matriculas.php', {
