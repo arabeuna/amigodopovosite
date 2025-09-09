@@ -75,33 +75,7 @@ class MYPDF extends TCPDF {
         $this->Ln(28);
     }
     
-    // Rodapé personalizado
-    public function Footer() {
-        $this->SetY(-18);
-        
-        // Linha separadora (mais elegante)
-        $this->SetDrawColor(0, 51, 102);
-        $this->SetLineWidth(0.3);
-        $this->Line(15, $this->GetY(), 195, $this->GetY());
-        
-        // Logo pequena no footer (melhor posicionamento)
-        $logo_footer_path = 'assets/images/logo_associacao.jpg';
-        if (file_exists($logo_footer_path)) {
-            $this->Image($logo_footer_path, 15, $this->GetY() + 1, 8, 8, '', '', '', false, 300, '', false, false, 1);
-        }
-        
-        // Informações do documento (melhor formatação)
-        $this->SetFont('helvetica', '', 7);
-        $this->SetTextColor(90, 90, 90);
-        $this->SetXY(45, $this->GetY() + 3);
-        $this->Cell(0, 4, 'Documento gerado em: ' . date('d/m/Y H:i:s'), 0, false, 'L', 0, '', 0, false, 'T', 'M');
-        
-        // Número da página (melhor posicionamento)
-        $this->SetFont('helvetica', 'B', 7);
-        $this->SetTextColor(0, 51, 102);
-        $this->SetXY(150, $this->GetY());
-        $this->Cell(0, 4, 'Página ' . $this->getAliasNumPage() . ' de ' . $this->getAliasNbPages(), 0, false, 'R', 0, '', 0, false, 'T', 'M');
-    }
+    // Rodapé removido para evitar bugs de sobreposição entre páginas
 }
 
 // Criar PDF
@@ -118,8 +92,8 @@ $pdf->SetKeywords('cadastro, aluno, ficha');
 $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 $pdf->SetMargins(15, 30, 15);
 $pdf->SetHeaderMargin(5);
-$pdf->SetFooterMargin(10);
-$pdf->SetAutoPageBreak(TRUE, 25);
+$pdf->SetFooterMargin(0);
+$pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
 
 // Adicionar página
